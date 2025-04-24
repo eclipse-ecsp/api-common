@@ -1,7 +1,10 @@
 [<img src="./images/logo.png" width="400" height="200"/>](./images/logo.png)
 
 # api-common
-ADD BUILD/RELESE/SONAR BADGES
+[![Maven Build & Sonar Analysis](https://github.com/eclipse-ecsp/api-common/actions/workflows/maven-build.yml/badge.svg)](https://github.com/eclipse-ecsp/api-common/actions/workflows/maven-build.yml)
+[![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=eclipse-ecsp_api-common&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=eclipse-ecsp_api-common)
+[![License Compliance](https://github.com/eclipse-ecsp/api-common/actions/workflows/licence-compliance.yaml/badge.svg)](https://github.com/eclipse-ecsp/api-common/actions/workflows/licence-compliance.yaml)
+[![Latest Release](https://img.shields.io/github/v/release/eclipse-ecsp/api-common?sort=semver)](https://github.com/eclipse-ecsp/api-common/releases)
 
 api-common is a Java library that is used in the API microservices. It provides some common and necessary functionality to microservices that expose REST APIs.
 
