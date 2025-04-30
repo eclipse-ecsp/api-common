@@ -61,17 +61,6 @@ the version of other modules and 3rd-party library are in services-dependencies
     <relativePath/> <!-- lookup parent from repository -->
   </parent>
 ```
-
-* ecsp stream-base test jar
-
-```xml
- <dependency>
-    <groupId>org.eclipse.ecsp</groupId>
-    <artifactId>stream-base</artifactId>
-    <type>test-jar</type>
-    <scope>test</scope>
- </dependency>
-```
 * ecsp cache-enabler
 
 ```xml

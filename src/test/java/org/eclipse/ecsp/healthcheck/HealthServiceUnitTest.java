@@ -22,6 +22,7 @@ import io.prometheus.client.CollectorRegistry;
 import org.eclipse.ecsp.nosqldao.spring.config.IgniteDAOMongoConfigWithProps;
 import org.eclipse.ecsp.testutils.CommonTestBase;
 import org.eclipse.ecsp.validations.HealthValidation;
+import org.eclipse.ecsp.validations.ServicesHealthCheckCallback;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -82,6 +83,13 @@ public class HealthServiceUnitTest extends CommonTestBase {
         List<HealthMonitor> healthMonitorList = healthValidation.doInitialHealthValidation();
         assertFalse(healthMonitorList.isEmpty());
         assertEquals("MONGO_HEALTH_MONITOR", healthMonitorList.get(0).monitorName());
+    }
+
+    @Test
+    public void testPerformRestart() {
+        ServicesHealthCheckCallback servicesHealthCheckCallback = new ServicesHealthCheckCallback();
+        boolean result = servicesHealthCheckCallback.performRestart();
+        assertFalse(result);
     }
     
 }
