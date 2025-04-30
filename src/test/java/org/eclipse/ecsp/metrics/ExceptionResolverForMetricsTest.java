@@ -60,7 +60,7 @@ public class ExceptionResolverForMetricsTest {
     }
     
     @Test
-    public void testEnabled() throws Exception {
+    public void testEnabled() {
         ModelAndView mav = exceptionResolver.resolveException(request, response, null,
             new IllegalStateException("sample"));
         Assert.assertNull(mav);

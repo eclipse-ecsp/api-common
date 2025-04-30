@@ -33,10 +33,8 @@ import org.springframework.boot.autoconfigure.mongo.MongoAutoConfiguration;
 import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.boot.web.servlet.support.SpringBootServletInitializer;
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.EnableAspectJAutoProxy;
 import org.springframework.context.annotation.PropertySource;
-import org.springframework.context.annotation.PropertySources;
 import org.springframework.core.SpringProperties;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.core.convert.support.DefaultConversionService;
@@ -51,14 +49,12 @@ import org.springframework.web.context.WebApplicationContext;
  */
 @SpringBootApplication
 @EnableAspectJAutoProxy(proxyTargetClass = true)
-@PropertySources({
-    @PropertySource(value = "classpath:/application-base.properties"),
-    @PropertySource(ignoreResourceNotFound = true, value = "classpath:/application.properties")
-})
+@PropertySource(value = "classpath:/application-base.properties")
+@PropertySource(ignoreResourceNotFound = true, value = "classpath:/application.properties")
 @EnableAutoConfiguration(exclude = MongoAutoConfiguration.class)
 public class Application extends SpringBootServletInitializer {
     
-    private static final IgniteLogger LOGGER = IgniteLoggerFactory.getLogger(Application.class);
+    private static final IgniteLogger IGNITE_LOGGER = IgniteLoggerFactory.getLogger(Application.class);
 
     /**
      * initialize application.
@@ -83,9 +79,9 @@ public class Application extends SpringBootServletInitializer {
     
     @Override
     protected WebApplicationContext createRootApplicationContext(ServletContext servletContext) {
-        if (servletContext.getContextPath().length() > 0) {
+        if (!servletContext.getContextPath().isEmpty()) {
             String activeProfile = servletContext.getContextPath().substring(1);
-            LOGGER.info("Setting current profile to {}", activeProfile);
+            IGNITE_LOGGER.info("Setting current profile to {}", activeProfile);
             servletContext.setInitParameter("spring.profiles.active", activeProfile);
         }
         return super.createRootApplicationContext(servletContext);

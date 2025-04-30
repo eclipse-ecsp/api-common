@@ -34,15 +34,12 @@ public class ValidEnumImpl implements ConstraintValidator<ValidEnum, String> {
     
     @Override
     public boolean isValid(String value, ConstraintValidatorContext context) {
-        if (!valueList.contains(value.toUpperCase())) {
-            return false;
-        }
-        return true;
+        return valueList.contains(value.toUpperCase());
     }
     
     @Override
     public void initialize(ValidEnum constraintAnnotation) {
-        valueList = new ArrayList<String>();
+        valueList = new ArrayList<>();
         Class<? extends Enum<?>> enumClass = constraintAnnotation.enumClazz();
         
         @SuppressWarnings("rawtypes")

@@ -21,12 +21,11 @@ package org.eclipse.ecsp.performance.rest;
 import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.Timer;
 import jakarta.servlet.ServletContext;
+import org.apache.commons.lang3.StringUtils;
 import org.eclipse.ecsp.utils.logger.IgniteLogger;
 import org.eclipse.ecsp.utils.logger.IgniteLoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
@@ -44,36 +43,70 @@ import java.util.SortedMap;
  */
 @RestController
 public class PerformanceMonitorController {
-    
-    private static final IgniteLogger LOGGER =
-        IgniteLoggerFactory.getLogger(PerformanceMonitorController.class);
 
+    private static final IgniteLogger LOGGER =
+            IgniteLoggerFactory.getLogger(PerformanceMonitorController.class);
     /**
-     * A_DOUBLE.
+     * Constant representing a conversion factor for nanoseconds to milliseconds.
      */
     public static final double A_DOUBLE = 1000000.0D;
 
     /**
-     * INT_4.
+     * Constant representing the integer value 4, used for substring operations.
      */
     public static final int INT_4 = 4;
 
     /**
-     * INT_16.
+     * Constant representing the integer value 16, used for substring operations.
      */
     public static final int INT_16 = 16;
 
     /**
-     * INT_2.
+     * Constant representing the integer value 2, used for substring operations.
      */
     public static final int INT_2 = 2;
-    
-    @Autowired
-    private MetricRegistry metricRegistry;
-    @Autowired
-    private ServletContext context;
-    private java.text.DecimalFormat numberFormatter = new DecimalFormat("###.##");
-    
+
+    /**
+     * Constant representing the string "method=", used for identifying method-related metrics.
+     */
+    public static final String METHOD = "method=";
+
+    /**
+     * Constant representing the opening HTML &lt;td&gt; tag.
+     */
+    public static final String TD_OPEN_TAG = "<td>";
+
+    /**
+     * Constant representing the closing HTML &lt;&#x2F;td&gt; tag.
+     */
+    public static final String TD_CLOSE_TAG = "</td>";
+
+    /**
+     * Constant representing the closing HTML &lt;&#x2F;th&gt; tag.
+     */
+    public static final String TH_CLOSE_TAG = "</th>";
+
+    /**
+     * Constant representing the opening HTML &lt;th&gt; tag.
+     */
+    public static final String TH_OPEN_TAG = "<th>";
+
+    private final MetricRegistry metricRegistry;
+
+    private final ServletContext context;
+    private final java.text.DecimalFormat numberFormatter = new DecimalFormat("###.##");
+
+    /**
+     * Constructor to initialize the metric registry and servlet context.
+     *
+     * @param metricRegistry MetricRegistry instance
+     * @param context        ServletContext instance
+     */
+    public PerformanceMonitorController(MetricRegistry metricRegistry, ServletContext context) {
+        this.metricRegistry = metricRegistry;
+        this.context = context;
+    }
+
     /**
      * export api to fetch metrics for particular api or all.
      *
@@ -81,7 +114,6 @@ public class PerformanceMonitorController {
      * @return metrics in html format
      */
     @GetMapping(path = "/v1/jamon-metrics")
-    @ResponseBody
     public String get(@RequestParam(name = "api", required = false) String api) {
         LOGGER.info("API: " + api);
         if ((api != null) && api.equals("all")) {
@@ -91,14 +123,14 @@ public class PerformanceMonitorController {
         buffer.append("<html>");
         createHead(buffer);
         buffer.append("<h1>Metrics</h1>");
-        
+
         createSelection(buffer, api, context.getContextPath());
         buffer.append("*All timings in ms. Rates are in requests/second.");
         buffer.append("<table>");
         addHeader(buffer);
         SortedMap<String, Timer> timers = metricRegistry.getTimers();
         for (Entry<String, Timer> entry : timers.entrySet()) {
-            if ((api == null) || (api.length() == 0) || entry.getKey().contains(api)) {
+            if (StringUtils.isEmpty(api) || entry.getKey().contains(api)) {
                 addTimer(buffer, entry, (api == null || api.isEmpty()));
             }
         }
@@ -106,7 +138,7 @@ public class PerformanceMonitorController {
         buffer.append("</html>");
         return buffer.toString();
     }
-    
+
     /**
      * api to reset metrics.<br/>
      * reset all the Histogram, Counter, Gauge.
@@ -114,7 +146,6 @@ public class PerformanceMonitorController {
      * @return success if the reset is successful
      */
     @GetMapping(path = "/v1/metrics/reset")
-    @ResponseBody
     public String get() {
         for (String s : metricRegistry.getTimers().keySet()) {
             metricRegistry.remove(s);
@@ -127,136 +158,136 @@ public class PerformanceMonitorController {
         }
         return "success";
     }
-    
+
     private void createHead(StringBuilder buffer) {
         buffer.append("<style>")
-            .append("table, th, td {")
-            .append("border: 1px solid black;")
-            .append("}")
-            .append("</style>");
-        
+                .append("table, th, td {")
+                .append("border: 1px solid black;")
+                .append("}")
+                .append("</style>");
+
     }
-    
+
     private void createSelection(StringBuilder buffer, String selection, String contextPath) {
         Set<String> uniqueApis = new HashSet<>();
         for (Entry<String, Timer> entry : metricRegistry.getTimers().entrySet()) {
-            if (entry.getKey().contains("method=")) {
-                uniqueApis.add(entry.getKey().substring(INT_4, entry.getKey().indexOf("method=") - 1));
+            if (entry.getKey().contains(METHOD)) {
+                uniqueApis.add(entry.getKey().substring(INT_4, entry.getKey().indexOf(METHOD) - 1));
             }
         }
-        List<String> apiList = new ArrayList<String>(uniqueApis);
+        List<String> apiList = new ArrayList<>(uniqueApis);
         Collections.sort(apiList);
         buffer.append(
-                "<form action=\"" + ((contextPath == null || contextPath.isEmpty()) ? "" : contextPath)
-                    + "/v1/metrics\" method=\"get\">")
-            .append("Choose an API &nbsp; <select name=api>");
+                        "<form action=\"" + ((contextPath == null || contextPath.isEmpty()) ? "" : contextPath)
+                                + "/v1/metrics\" method=\"get\">")
+                .append("Choose an API &nbsp; <select name=api>");
         boolean selected = false;
         apiList.add(0, "all");
         for (String a : apiList) {
             selected = (selection != null) && a.equals(selection);
             buffer.append("<option value=\"")
-                .append(a)
-                .append("\"")
-                .append(selected ? " selected" : "")
-                .append(">")
-                .append(condenseSignature(a))
-                .append("</option>");
+                    .append(a)
+                    .append("\"")
+                    .append(selected ? " selected" : "")
+                    .append(">")
+                    .append(condenseSignature(a))
+                    .append("</option>");
         }
         buffer.append("</select>")
-            .append("&nbsp;<input type=\"submit\">")
-            .append("</form>");
-        
+                .append("&nbsp;<input type=\"submit\">")
+                .append("</form>");
+
     }
-    
+
     private String condenseSignature(String signature) {
-        return signature.replace("org.eclipse.ecsp", "o.e.e").replace("java.lang", "j.l")
-            .replace("public", "")
-            .replace("java.util", "j.u").replace("javax.servlet", "j.s");
+        return signature.replace("com.harman.haa.api", "c.h.h.a").replace("java.lang", "j.l")
+                .replace("public", "")
+                .replace("java.util", "j.u").replace("jakarta.servlet", "j.s");
     }
-    
+
     private void addTimer(StringBuilder buffer, Entry<String, Timer> entry,
                           boolean includeApiPrefix) {
-        if (entry.getKey().contains("method=")) {
+        if (entry.getKey().contains(METHOD)) {
             String signature = includeApiPrefix ? entry.getKey()
-                : entry.getKey()
-                .substring(entry.getKey().indexOf("execution(") + INT_16, entry.getKey().length() - INT_2);
+                    : entry.getKey()
+                    .substring(entry.getKey().indexOf("execution(") + INT_16, entry.getKey().length() - INT_2);
             signature = condenseSignature(signature);
             buffer.append("<tr>")
-                .append("<td>")
-                .append(signature)
-                .append("</td>")
-                .append("<td>")
-                .append(numberFormatter.format(entry.getValue().getSnapshot().getMean() / A_DOUBLE))
-                .append("</td>")
-                .append("<td>")
-                .append(numberFormatter.format(entry.getValue().getSnapshot().getMin() / A_DOUBLE))
-                .append("</td>")
-                .append("<td>")
-                .append(numberFormatter.format(entry.getValue().getSnapshot().getMax() / A_DOUBLE))
-                .append("</td>")
-                .append("<td>")
-                .append(entry.getValue().getCount())
-                .append("</td>")
-                .append("<td>")
-                .append(numberFormatter.format(
-                    entry.getValue().getSnapshot().get95thPercentile() / A_DOUBLE))
-                .append("</td>")
-                .append("<td>")
-                .append(numberFormatter.format(
-                    entry.getValue().getSnapshot().get99thPercentile() / A_DOUBLE))
-                .append("</td>")
-                .append("<td>")
-                .append(numberFormatter.format(
-                    entry.getValue().getSnapshot().get75thPercentile() / A_DOUBLE))
-                .append("</td>")
-                .append("<td>")
-                .append(numberFormatter.format(entry.getValue().getMeanRate()))
-                .append("</td>")
-                .append("<td>")
-                .append(numberFormatter.format(entry.getValue().getOneMinuteRate()))
-                .append("</td>")
-                .append("<td>")
-                .append(numberFormatter.format(entry.getValue().getFiveMinuteRate()))
-                .append("</td>")
-                .append("</tr>");
+                    .append(TD_OPEN_TAG)
+                    .append(signature)
+                    .append(TD_CLOSE_TAG)
+                    .append(TD_OPEN_TAG)
+                    .append(numberFormatter.format(entry.getValue().getSnapshot().getMean() / A_DOUBLE))
+                    .append(TD_CLOSE_TAG)
+                    .append(TD_OPEN_TAG)
+                    .append(numberFormatter.format(entry.getValue().getSnapshot().getMin() / A_DOUBLE))
+                    .append(TD_CLOSE_TAG)
+                    .append(TD_OPEN_TAG)
+                    .append(numberFormatter.format(entry.getValue().getSnapshot().getMax() / A_DOUBLE))
+                    .append(TD_CLOSE_TAG)
+                    .append(TD_OPEN_TAG)
+                    .append(entry.getValue().getCount())
+                    .append(TD_CLOSE_TAG)
+                    .append(TD_OPEN_TAG)
+                    .append(numberFormatter.format(
+                            entry.getValue().getSnapshot().get95thPercentile() / A_DOUBLE))
+                    .append(TD_CLOSE_TAG)
+                    .append(TD_OPEN_TAG)
+                    .append(numberFormatter.format(
+                            entry.getValue().getSnapshot().get99thPercentile() / A_DOUBLE))
+                    .append(TD_CLOSE_TAG)
+                    .append(TD_OPEN_TAG)
+                    .append(numberFormatter.format(
+                            entry.getValue().getSnapshot().get75thPercentile() / A_DOUBLE))
+                    .append(TD_CLOSE_TAG)
+                    .append(TD_OPEN_TAG)
+                    .append(numberFormatter.format(entry.getValue().getMeanRate()))
+                    .append(TD_CLOSE_TAG)
+                    .append(TD_OPEN_TAG)
+                    .append(numberFormatter.format(entry.getValue().getOneMinuteRate()))
+                    .append(TD_CLOSE_TAG)
+                    .append(TD_OPEN_TAG)
+                    .append(numberFormatter.format(entry.getValue().getFiveMinuteRate()))
+                    .append(TD_CLOSE_TAG)
+                    .append("</tr>");
         }
     }
-    
+
     private void addHeader(StringBuilder buffer) {
         buffer.append("<tr>")
-            .append("<th>")
-            .append("Execution")
-            .append("</th>")
-            .append("<th>")
-            .append("Mean")
-            .append("</th>")
-            .append("<th>")
-            .append("Min")
-            .append("</th>")
-            .append("<th>")
-            .append("Max")
-            .append("</th>")
-            .append("<th>")
-            .append("Count")
-            .append("</th>")
-            .append("<th>")
-            .append("95th")
-            .append("</th>")
-            .append("<th>")
-            .append("99th")
-            .append("</th>")
-            .append("<th>")
-            .append("75th")
-            .append("</th>")
-            .append("<th>")
-            .append("Mean rate")
-            .append("</th>")
-            .append("<th>")
-            .append("1 min rate")
-            .append("</th>")
-            .append("<th>")
-            .append("5 min rate")
-            .append("</th>")
-            .append("</tr>");
+                .append(TH_OPEN_TAG)
+                .append("Execution")
+                .append(TH_CLOSE_TAG)
+                .append(TH_OPEN_TAG)
+                .append("Mean")
+                .append(TH_CLOSE_TAG)
+                .append(TH_OPEN_TAG)
+                .append("Min")
+                .append(TH_CLOSE_TAG)
+                .append(TH_OPEN_TAG)
+                .append("Max")
+                .append(TH_CLOSE_TAG)
+                .append(TH_OPEN_TAG)
+                .append("Count")
+                .append(TH_CLOSE_TAG)
+                .append(TH_OPEN_TAG)
+                .append("95th")
+                .append(TH_CLOSE_TAG)
+                .append(TH_OPEN_TAG)
+                .append("99th")
+                .append(TH_CLOSE_TAG)
+                .append(TH_OPEN_TAG)
+                .append("75th")
+                .append(TH_CLOSE_TAG)
+                .append(TH_OPEN_TAG)
+                .append("Mean rate")
+                .append(TH_CLOSE_TAG)
+                .append(TH_OPEN_TAG)
+                .append("1 min rate")
+                .append(TH_CLOSE_TAG)
+                .append(TH_OPEN_TAG)
+                .append("5 min rate")
+                .append(TH_CLOSE_TAG)
+                .append("</tr>");
     }
 }

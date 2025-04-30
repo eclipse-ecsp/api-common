@@ -18,8 +18,6 @@
 
 package org.eclipse.ecsp.configurations;
 
-
-import org.apache.commons.lang3.StringUtils;
 import org.eclipse.ecsp.metrics.MetricsFilter;
 import org.eclipse.ecsp.utils.logger.IgniteLogger;
 import org.eclipse.ecsp.utils.logger.IgniteLoggerFactory;
@@ -41,7 +39,7 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 public class WebConfig implements WebMvcConfigurer {
     private static final IgniteLogger LOGGER = IgniteLoggerFactory.getLogger(WebConfig.class);
     
-    @Value("${cors.origin.allow}")
+    @Value("${cors.origin.allow:*}")
     private String corsOriginAllow;
     
     @Value("${metrics.enabled}")
@@ -76,11 +74,7 @@ public class WebConfig implements WebMvcConfigurer {
         return new WebMvcConfigurer() {
             @Override
             public void addCorsMappings(CorsRegistry registry) {
-                if (!StringUtils.isBlank(corsOriginAllow)) {
-                    registry.addMapping(corsOriginAllow.trim());
-                } else {
-                    registry.addMapping("*");
-                }
+                registry.addMapping(corsOriginAllow.trim());
             }
         };
     }
@@ -97,7 +91,7 @@ public class WebConfig implements WebMvcConfigurer {
         filter.setApiProcessingDurationBuckets(apiProcessingDurationBuckets);
         filter.setNodeName(nodeName);
         filter.setMetricsEnabled(metricsEnabled);
-        FilterRegistrationBean<MetricsFilter> mfrb = new FilterRegistrationBean<MetricsFilter>(filter);
+        FilterRegistrationBean<MetricsFilter> mfrb = new FilterRegistrationBean<>(filter);
         mfrb.setEnabled(metricsEnabled);
         mfrb.setOrder(Ordered.HIGHEST_PRECEDENCE);
         return mfrb;

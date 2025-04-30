@@ -23,12 +23,11 @@ import jakarta.annotation.PreDestroy;
 import org.apache.kafka.clients.producer.Producer;
 import org.apache.kafka.clients.producer.ProducerRecord;
 import org.apache.kafka.clients.producer.RecordMetadata;
-import org.apache.kafka.common.errors.NotLeaderForPartitionException;
+import org.apache.kafka.common.errors.NotLeaderOrFollowerException;
 import org.eclipse.ecsp.entities.IgniteEvent;
 import org.eclipse.ecsp.transform.GenericIgniteEventTransformer;
 import org.eclipse.ecsp.utils.logger.IgniteLogger;
 import org.eclipse.ecsp.utils.logger.IgniteLoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Service;
@@ -61,12 +60,30 @@ public class KafkaService {
     @Value("${kafka.producer.synchronous.push:false}")
     private boolean isSynchronousPublish;
 
-    @Autowired
-    private GenericIgniteEventTransformer eventTransformer;
+    private final GenericIgniteEventTransformer eventTransformer;
 
-    @Autowired
-    private Producer<byte[], byte[]> producer;
+    private final Producer<byte[], byte[]> producer;
 
+    /**
+     * Constructor to initialize kafka producer and event transformer.
+     *
+     * @param producer        kafka producer
+     * @param eventTransformer event transformer
+     */
+    public KafkaService(Producer<byte[], byte[]> producer, GenericIgniteEventTransformer eventTransformer) {
+        this.producer = producer;
+        this.eventTransformer = eventTransformer;
+    }
+
+    /**
+     * Send ignite event to configured source kafka topic on kafka.sink.topic property.
+     * this uses default {@link GenericIgniteEventTransformer} <br/>
+     * which convert the {@link IgniteEvent} to bytes<br/>
+     * this uses {@link IgniteEvent#getVehicleId()} as kafka key
+     *
+     * @param key         kafka key
+     * @param igniteEvent event to send to kafka topic
+     */
     private void sendToSink(String key, IgniteEvent igniteEvent) throws ExecutionException {
         sendToSinkTopic(key, igniteEvent, topic);
     }
@@ -159,7 +176,7 @@ public class KafkaService {
             LOGGER.warn("Error in the response: {} for the vehicle: {}", response,
                     igniteEvent.getVehicleId());
             Thread.currentThread().interrupt();
-        } catch (NotLeaderForPartitionException nlfpe) {
+        } catch (NotLeaderOrFollowerException ex) {
             try {
                 Thread.sleep(KAFKA_ERROR_WAIT_MS);
             } catch (InterruptedException e) {
@@ -189,9 +206,9 @@ public class KafkaService {
                     response,
                     igniteEvent.getVehicleId());
             Thread.currentThread().interrupt();
-        } catch (NotLeaderForPartitionException nlfpe) {
+        } catch (NotLeaderOrFollowerException ex) {
             LOGGER.warn("Caught exception when publishing to Kafka. Will attempt retry after {}",
-                    KAFKA_ERROR_WAIT_MS, nlfpe);
+                    KAFKA_ERROR_WAIT_MS, ex);
             try {
                 Thread.sleep(KAFKA_ERROR_WAIT_MS);
             } catch (InterruptedException e) {
@@ -230,11 +247,9 @@ public class KafkaService {
 
     /**
      * flush and closing kafka producer.
-     *
-     * @throws Exception when unable to flush or close kafka producer
      */
     @PreDestroy
-    public void cleanUp() throws Exception {
+    public void cleanUp() {
         LOGGER.info("Flushing and closing kafka producer");
         producer.flush();
         producer.close();

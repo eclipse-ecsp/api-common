@@ -18,9 +18,7 @@
 
 package org.eclipse.ecsp.utils;
 
-import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.eclipse.ecsp.domain.Version;
@@ -34,6 +32,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 
 /**
@@ -105,14 +104,14 @@ public class JsonUtilsTest {
     }
     
     @Test
-    public void parseInputJsonTest() throws JsonParseException, JsonMappingException, IOException {
+    public void parseInputJsonTest() throws IOException {
         Inner inner = jsonUtils.parseInputJson("{\"val\":\"test\"}", Inner.class);
         Assert.assertEquals("test", inner.getVal());
     }
     
     @Test
     public void safeGetBooleanFromJsonNodeTest()
-        throws JsonMappingException, JsonProcessingException {
+        throws JsonProcessingException {
         String jsonString = "{\"switch\":true}";
         JsonNode json = jsonMapper.readValue(jsonString, JsonNode.class);
         Assert.assertTrue(jsonUtils.safeGetBooleanFromJsonNode("switch", json));
@@ -129,7 +128,7 @@ public class JsonUtilsTest {
     public void getJsonNodeTest() {
         String jsonString = "{\"Data\":{\"switch\":\"True\"}}";
         JsonNode json = jsonUtils.getJsonNode("Data", jsonString);
-        Assert.assertEquals(json.size(), 1);
+        Assert.assertEquals(1, json.size());
         json = jsonUtils.getJsonNode("Data2", jsonString);
         assertNull(json);
         String jsonString2 = "A";
@@ -144,7 +143,8 @@ public class JsonUtilsTest {
         Map map = jsonUtils.getJsonAsMap(jsonString);
         Assert.assertNotNull(map.get("switch"));
         map = jsonUtils.getJsonAsMap(jsonString2);
-        assertNull(map);
+        assertNotNull(map);
+        Assert.assertTrue(map.isEmpty());
     }
     
     @Test
@@ -163,10 +163,12 @@ public class JsonUtilsTest {
     }
     
     @Test
-    public void bindDataTest() throws JsonParseException, JsonMappingException, IOException {
-        String jsonString = "{\"val\":\"test\"}";
+    public void bindDataTest() throws IOException {
+        String jsonString = """
+                { "val": "test" }
+                """;
         Inner inner = jsonUtils.bindData(jsonString, Inner.class);
-        Assert.assertEquals(inner.getVal(), "test");
+        Assert.assertEquals("test", inner.getVal());
     }
     
     @Test

@@ -63,17 +63,16 @@ public class KafkaProducerTest extends CommonTestBase {
     private Producer producer;
     
     @Test
-    public void testKafkaProducerProperties() throws Exception {
-        
+    public void testKafkaProducerProperties() {
         kafkaConfig.initialize();
         producer = kafkaConfig.producer();
-        
-        KafkaProducer<String, String> kafkaProduce = (KafkaProducer) kafkaConfig.producer();
-        LOGGER.debug("Kafak Producer properties : {}", kafkaProduce.toString());
-        
-        LOGGER.debug("Producer properties : {}", producer);
-        
         Assert.assertNotNull(producer);
+        if (producer instanceof KafkaProducer<?, ?> kafkaProducer) {
+            KafkaProducer<String, String> kafkaProduce = (KafkaProducer<String, String>) kafkaProducer;
+            LOGGER.debug("Kafka Producer properties : {}", kafkaProduce);
+            LOGGER.debug("Producer properties : {}", producer);
+        }
+
     }
     
 }

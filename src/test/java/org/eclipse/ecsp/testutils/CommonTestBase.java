@@ -30,6 +30,8 @@ import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 import org.testcontainers.junit.jupiter.Testcontainers;
 import java.util.Properties;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 
 /**
  * A convenient base class for integration testing.
@@ -78,13 +80,13 @@ public class CommonTestBase {
 
     @DynamicPropertySource
     static void setProperties(DynamicPropertyRegistry registry) {
-        registry.add("mongodb.hosts", MONGO_SERVER::getMongoDBHost);
-        registry.add("mongodb.port", MONGO_SERVER::getMongoDBPort);
+        registry.add("mongodb.hosts", MONGO_SERVER::getMongoServerHost);
+        registry.add("mongodb.port", MONGO_SERVER::getMongoServerPort);
         registry.add("redis.address", REDIS_SERVER::getRedisAddress);
         registry.add("kafka.broker.url", KAFKA_CLUSTER::getKafkaBrokerList);
     }
 
-    protected void setup() throws Exception {
+    protected void setup() {
         CollectorRegistry.defaultRegistry.clear();
         consumerProps.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, KAFKA_CLUSTER.bootstrapServers());
         consumerProps.put(ConsumerConfig.GROUP_ID_CONFIG, "tc-consumer");
@@ -114,14 +116,17 @@ public class CommonTestBase {
                     LOGGER.error("Deleting topic: " + topic + " got exception", e);
                 }
                 try {
-                    Thread.sleep(topicCreateIntervalMs);
+                    CountDownLatch countDownLatch = new CountDownLatch(1);
+                    if (!countDownLatch.await(topicCreateIntervalMs, TimeUnit.MILLISECONDS)) {
+                        LOGGER.warn("Timeout occurred while waiting for latch countdown");
+                    }
                 } catch (InterruptedException e) {
                     // ignore
                 }
                 LOGGER.info("Creating topic {}", topic);
                 try {
                     KAFKA_CLUSTER.createTopic(topic);
-                } catch (TopicExistsException | InterruptedException tee) {
+                } catch (TopicExistsException tee) {
                     LOGGER.error("Creating topic {} failed. Will delete and try again", topic);
                     continue;
                 }
@@ -134,6 +139,6 @@ public class CommonTestBase {
      * Hook to add cleanup related code.
      */
     protected void teardown() throws Exception {
-    
+        // no-op
     }
 }

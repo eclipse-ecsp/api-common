@@ -22,7 +22,6 @@ import org.eclipse.ecsp.healthcheck.HealthMonitor;
 import org.eclipse.ecsp.healthcheck.HealthService;
 import org.eclipse.ecsp.utils.logger.IgniteLogger;
 import org.eclipse.ecsp.utils.logger.IgniteLoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.boot.context.event.ApplicationStartedEvent;
 import org.springframework.context.event.EventListener;
@@ -38,17 +37,15 @@ import java.util.List;
 public class HealthValidation {
     
     private static final IgniteLogger LOGGER = IgniteLoggerFactory.getLogger(HealthValidation.class);
-    
-    @Autowired
-    HealthService healthService;
+
+    private final HealthService healthService;
 
     /**
-     * This method is a setter for healthservice.
+     * Constructor for {@link HealthValidation}.
      *
-     * @param healthService : HealthService
+     * @param healthService {@link HealthService}
      */
-    
-    public void setHealthService(HealthService healthService) {
+    public HealthValidation(HealthService healthService) {
         this.healthService = healthService;
     }
     
@@ -59,16 +56,10 @@ public class HealthValidation {
      * @return list of {@link HealthMonitor}
      */
     @EventListener(classes = ApplicationStartedEvent.class)
-    public List<HealthMonitor> doInitialHealthValdiation() {
-        
-        List<HealthMonitor> healthMonitorList = null;
-        
+    public List<HealthMonitor> doInitialHealthValidation() {
         LOGGER.info("API Commons initial health check trigger started");
-        
-        healthMonitorList = healthService.triggerInitialCheck();
-        
+        List<HealthMonitor> healthMonitorList = healthService.triggerInitialCheck();
         LOGGER.info("API Commons initial health check trigger completed");
-        
         return healthMonitorList;
         
     }
@@ -78,9 +69,9 @@ public class HealthValidation {
      * which performs periodic health checks.
      */
     @EventListener(classes = ApplicationReadyEvent.class)
-    public void startPeriodicHealthValdiation() {
+    public void startPeriodicHealthValidation() {
         
-        LOGGER.info("API Commons initialting periodic health check");
+        LOGGER.info("API Commons initialing periodic health check");
         
         healthService.registerCallBack(new ServicesHealthCheckCallback());
         healthService.startHealthServiceExecutor();

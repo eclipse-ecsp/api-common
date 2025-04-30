@@ -32,6 +32,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import org.eclipse.ecsp.utils.logger.IgniteLogger;
 import org.eclipse.ecsp.utils.logger.IgniteLoggerFactory;
 import java.io.IOException;
+import java.util.List;
 
 /**
  * Servlet filter that reports metrics. The following metrics are reported
@@ -94,7 +95,7 @@ public class MetricsFilter implements Filter {
     @Override
     public void init(FilterConfig fc) throws ServletException {
         LOGGER.info("metricsEnabled: {}", metricsEnabled);
-        LOGGER.info("apiProcessingDurationBuckets: {}", apiProcessingDurationBuckets);
+        LOGGER.info("apiProcessingDurationBuckets: {}", List.of(apiProcessingDurationBuckets));
         if (metricsEnabled) {
             String[] labelNames = new String[] {"method", "node"};
             requestsCounter = Counter.build().name("api_requests_total").help("Counter for api requests")

@@ -45,9 +45,9 @@ public class ObjectUtils {
      * @return object if validation passed
      */
     public static <T> T requireNonEmpty(T obj, String errorMsg) {
-        obj = Objects.requireNonNull(obj, errorMsg);
+        Objects.requireNonNull(obj, errorMsg);
         if (obj instanceof String str && str.isEmpty()) {
-            throw new RuntimeException(errorMsg);
+            throw new IllegalStateException(errorMsg);
         }
         return obj;
     }
@@ -64,7 +64,7 @@ public class ObjectUtils {
      */
     public static <T> boolean requireSizeOf(Collection<T> t, int expectedSize, String errorMsg) {
         if (t.size() != expectedSize) {
-            throw new RuntimeException(errorMsg);
+            throw new IllegalStateException(errorMsg);
         }
         return true;
     }
@@ -93,7 +93,7 @@ public class ObjectUtils {
      */
     public static <T> boolean requireMinSize(Collection<T> t, int expectedSize, String errorMsg) {
         if (t.size() < expectedSize) {
-            throw new RuntimeException(errorMsg);
+            throw new IllegalStateException(errorMsg);
         }
         return true;
     }
@@ -107,9 +107,9 @@ public class ObjectUtils {
      * @return true if not null and empty , otherwise throws NullPointerException or RuntimeException
      */
     public static <T> boolean requiresNotNullAndNotEmpy(Collection<T> t, String errorMsg) {
-        t = Objects.requireNonNull(t, errorMsg);
+        Objects.requireNonNull(t, errorMsg);
         if (t.isEmpty()) {
-            throw new RuntimeException(errorMsg);
+            throw new IllegalStateException(errorMsg);
         }
         return true;
     }

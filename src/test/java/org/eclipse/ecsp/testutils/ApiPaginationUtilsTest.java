@@ -18,7 +18,6 @@
 
 package org.eclipse.ecsp.testutils;
 
-import io.prometheus.client.CollectorRegistry;
 import org.eclipse.ecsp.nosqldao.IgniteCriteriaGroup;
 import org.eclipse.ecsp.nosqldao.IgniteQuery;
 import org.eclipse.ecsp.utils.ApiPaginationUtils;
@@ -159,8 +158,8 @@ public class ApiPaginationUtilsTest {
                 + "and(timestampKey=0)"
                 + "and(_id<1212)))",
             igniteQuery.toString());
-        assertEquals(igniteQuery.getPageNumber(), 1);
-        assertEquals(igniteQuery.getPageSize(), RESPONSE_SIZE_20);
+        assertEquals(1, igniteQuery.getPageNumber());
+        assertEquals(RESPONSE_SIZE_20, igniteQuery.getPageSize());
         assertFalse(igniteQuery.getOrderBys().isEmpty());
     }
     
@@ -186,8 +185,8 @@ public class ApiPaginationUtilsTest {
                 + "and(timestampKey=0)"
                 + "and(_id<1212)))",
             igniteQuery.toString());
-        assertEquals(igniteQuery.getPageNumber(), 1);
-        assertEquals(igniteQuery.getPageSize(), RESPONSES_LIMIT_30);
+        assertEquals(1, igniteQuery.getPageNumber());
+        assertEquals(RESPONSES_LIMIT_30, igniteQuery.getPageSize());
         assertFalse(igniteQuery.getOrderBys().isEmpty());
     }
     

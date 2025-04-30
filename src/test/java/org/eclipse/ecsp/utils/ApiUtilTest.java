@@ -36,8 +36,7 @@ public class ApiUtilTest {
     
     @Test
     public void getHeadersTest() {
-        HttpHeaders response = new HttpHeaders();
-        response = apiUtils.getHeaders("clientRequestId", "sessionId", "platformResponseId");
+        HttpHeaders response = apiUtils.getHeaders("clientRequestId", "sessionId", "platformResponseId");
         Assert.assertEquals("clientRequestId",
             response.get(Constants.HTTP_HEADER_CLIENT_REQUEST_ID).get(0));
         Assert.assertEquals("sessionId", response.get(Constants.HTTP_HEADER_SESSION_ID).get(0));
@@ -53,8 +52,7 @@ public class ApiUtilTest {
     
     @Test
     public void getHeadersWithoutClientRequestIdTest() {
-        HttpHeaders response = new HttpHeaders();
-        response = apiUtils.getHeaders("", "sessionId", "platformResponseId");
+        HttpHeaders response = apiUtils.getHeaders("", "sessionId", "platformResponseId");
         Assert.assertNull(response.get(Constants.HTTP_HEADER_CLIENT_REQUEST_ID));
         Assert.assertEquals("sessionId", response.get(Constants.HTTP_HEADER_SESSION_ID).get(0));
         Assert.assertEquals("platformResponseId",

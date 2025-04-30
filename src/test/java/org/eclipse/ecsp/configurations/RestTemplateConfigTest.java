@@ -26,6 +26,7 @@ import org.eclipse.ecsp.utils.logger.IgniteLogger;
 import org.eclipse.ecsp.utils.logger.IgniteLoggerFactory;
 import org.junit.Rule;
 import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -36,12 +37,12 @@ import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.web.client.ResourceAccessException;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
+import java.net.URI;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertThrows;
 
 /**
  * {@link RestTemplateConfigTest} contains test cases.<br/>
@@ -54,7 +55,7 @@ import static org.junit.Assert.assertThrows;
 @TestPropertySource("classpath:/rest-template-test.properties")
 public class RestTemplateConfigTest {
     private static final IgniteLogger LOGGER =
-        IgniteLoggerFactory.getLogger(RestTemplateConfig.class);
+        IgniteLoggerFactory.getLogger(RestTemplateConfigTest.class);
 
     /**
      * RESPONSE_CODE_200.
@@ -78,16 +79,15 @@ public class RestTemplateConfigTest {
     
     @Autowired
     RestTemplate restTemplate;
-    
-    @Rule
 
     /**
      * server.
      */
+    @Rule
     public final MockWebServer server = new MockWebServer();
     
     @Test
-    public void test_response_ok() throws Exception {
+    public void testResponseOk() throws Exception {
         server.url("/ok");
         server.enqueue(
             new MockResponse().setResponseCode(RESPONSE_CODE_200).setBody("ok")
@@ -101,35 +101,32 @@ public class RestTemplateConfigTest {
     }
     
     @Test
-    public void test_response_delay() {
+    public void testResponseDelay() {
         server.url("/ok");
         server.enqueue(
             new MockResponse().setResponseCode(RESPONSE_CODE_200).setBody("ok").setHeadersDelay(INT_4, TimeUnit.SECONDS)
         );
-        
-        assertThrows(ResourceAccessException.class, () -> {
-            ResponseEntity<String> response =
-                restTemplate.getForEntity(server.url("/ok").uri(), String.class);
-        });
+        URI url = server.url("/ok").uri();
+        try {
+            restTemplate.getForEntity(url, String.class);
+            Assertions.fail("Expected ResourceAccessException");
+        } catch (ResourceAccessException e) {
+            Assertions.assertTrue(() -> ExceptionUtils.getRootCauseMessage(e).contains("Read timed out"));
+        }
     }
     
     @Test
-    public void test_response_connection_pool() throws Exception {
+    public void testResponseConnectionPool() throws Exception {
         server.url("/ok");
-        
-        
         int loopCount = LOOP_COUNT;
         CountDownLatch countDownLatch = new CountDownLatch(loopCount);
         Map<String, Integer> requestCountMap = new HashMap<>();
-        
         for (int i = 0; i < loopCount; i++) {
             server.enqueue(new MockResponse().setResponseCode(RESPONSE_CODE_200).setBody("ok")
                 .setHeadersDelay(1, TimeUnit.SECONDS));
-            
             new Thread(() -> {
                 try {
-                    ResponseEntity<String> response =
-                        restTemplate.getForEntity(server.url("/ok").uri(), String.class);
+                    restTemplate.getForEntity(server.url("/ok").uri(), String.class);
                     countDownLatch.countDown();
                     requestCountMap.compute("SUCCESS", (k, v) -> v == null ? 0 : ++v);
                 } catch (RestClientException e) {
@@ -139,9 +136,12 @@ public class RestTemplateConfigTest {
                     countDownLatch.countDown();
                 }
             }, "request-" + i).start();
-            Thread.sleep(SLEEP_MILLIS);
+            if (!new CountDownLatch(1).await(SLEEP_MILLIS, TimeUnit.MILLISECONDS)) {
+                LOGGER.warn("Timeout occurred while waiting for latch countdown");
+            }
         }
         countDownLatch.await();
         LOGGER.info(requestCountMap.toString());
+        Assertions.assertNotNull(requestCountMap);
     }
 }

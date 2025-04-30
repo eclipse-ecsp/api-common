@@ -32,10 +32,10 @@ import org.eclipse.ecsp.utils.logger.IgniteLogger;
 import org.eclipse.ecsp.utils.logger.IgniteLoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.HandlerMapping;
+import java.util.List;
 
 /**
  * {@link PerformanceMonitorAspect} and histogram of the api request with the processing duration.
@@ -55,11 +55,9 @@ public class PerformanceMonitorAspect {
     public PerformanceMonitorAspect() {
         LOGGER.info("Instantiated");
     }
-    
-    @Autowired
-    @Lazy
+
     private MetricRegistry registry;
-    @Autowired
+
     private HttpServletRequest request;
 
     @Value("${performance.pointcut.expression:execution(* org.eclipse.ecsp..*.*(..))}")
@@ -75,8 +73,20 @@ public class PerformanceMonitorAspect {
     @Value("${node.name:undefined}")
     private String nodeName;
     
-    private ThreadLocal<String> currentApi = new ThreadLocal<>();
-    
+    private final ThreadLocal<String> currentApi = new ThreadLocal<>();
+
+    /**
+     * Constructor for {@link PerformanceMonitorAspect}.
+     *
+     * @param registry MetricRegistry
+     * @param request HttpServletRequest
+     */
+    @Autowired
+    public PerformanceMonitorAspect(MetricRegistry registry, HttpServletRequest request) {
+        this.registry = registry;
+        this.request = request;
+    }
+
     /**
      * register and export histogram of the api request with the processing duration.
      */
@@ -86,7 +96,7 @@ public class PerformanceMonitorAspect {
         if (newAgeMetricsEnabled) {
             LOGGER.info("Initializing default exports for prometheus");
             DefaultExports.initialize();
-            LOGGER.info("apiProcessingDurationBuckets: {}", apiProcessingDurationBuckets);
+            LOGGER.info("apiProcessingDurationBuckets: {}", List.of(apiProcessingDurationBuckets));
             String[] labelNames = new String[] {"api", "method", "node"};
             latencyHisto = Histogram.build().name("rest_processing_duration_seconds")
                 .help("REST api processing duration in seconds (excl Spring)")
@@ -116,7 +126,7 @@ public class PerformanceMonitorAspect {
             String api = (String) request.getAttribute(HandlerMapping.BEST_MATCHING_PATTERN_ATTRIBUTE);
             if (api == null) {
                 LOGGER.warn("Templated URL empty for request url (anonymized) {}",
-                    anonymizeUrl(request.getRequestURL()));
+                    anonymizeUrl(request.getRequestURL().toString()));
                 api = "unknown";
             }
             try (io.prometheus.client.Histogram.Timer t = latencyHisto.labels(api, request.getMethod(),
@@ -150,8 +160,8 @@ public class PerformanceMonitorAspect {
         }
     }
     
-    private String anonymizeUrl(StringBuffer requestUrl) {
-        return requestUrl.toString().replaceFirst("/users/[a-zA-Z0-9]*/", "/users/{uid}/")
+    private String anonymizeUrl(String requestUrl) {
+        return requestUrl.replaceFirst("/users/[a-zA-Z0-9]*/", "/users/{uid}/")
             .replaceFirst("/vehicles/[a-zA-Z0-9]*/",
                 "/vehicles/{vid}/");
     }

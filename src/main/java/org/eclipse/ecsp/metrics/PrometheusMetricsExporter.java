@@ -25,7 +25,6 @@ import org.eclipse.ecsp.utils.logger.IgniteLogger;
 import org.eclipse.ecsp.utils.logger.IgniteLoggerFactory;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
@@ -53,18 +52,15 @@ public class PrometheusMetricsExporter {
      * @return prometheus metrics
      */
     @GetMapping(path = "/metrics", produces = TextFormat.CONTENT_TYPE_004)
-    @ResponseBody
     public String get() {
         LOGGER.debug("Fetching prometheus metrics");
         StringBuilderWriter writer = new StringBuilderWriter(CAPACITY);
-        try {
+        try (writer) {
             TextFormat.write004(writer, CollectorRegistry.defaultRegistry.metricFamilySamples());
             writer.flush();
         } catch (Exception e) {
             LOGGER.warn("Could not flush out metrics, sending empty response", e);
             return EMPTY_STR;
-        } finally {
-            writer.close();
         }
         LOGGER.debug("Prometheus metrics export complete");
         return writer.getBuilder().toString();
