@@ -21,7 +21,7 @@ package org.eclipse.ecsp;
 import org.apache.kafka.clients.producer.MockProducer;
 import org.apache.kafka.clients.producer.ProducerRecord;
 import org.apache.kafka.clients.producer.RecordMetadata;
-import org.apache.kafka.common.errors.NotLeaderForPartitionException;
+import org.apache.kafka.common.errors.NotLeaderOrFollowerException;
 import org.apache.kafka.common.serialization.ByteArraySerializer;
 import org.eclipse.ecsp.domain.AbstractBlobEventData.Encoding;
 import org.eclipse.ecsp.domain.BlobDataV1_0;
@@ -133,7 +133,7 @@ public class KafkaServiceJunitTest {
         Future<RecordMetadata> future = Mockito.mock(Future.class);
         when(mockProducer.send(any(ProducerRecord.class))).thenReturn(future)
                 .thenThrow(RuntimeException.class);
-        doThrow(NotLeaderForPartitionException.class).when(future).get();
+        doThrow(NotLeaderOrFollowerException.class).when(future).get();
         kafkaService.sendIgniteEvent("userId010101", createIgniteEvent(Version.V1_0, "dummy", "FOOBAR"),
                 sinkTopic);
     }
@@ -198,7 +198,7 @@ public class KafkaServiceJunitTest {
         Future<RecordMetadata> future = Mockito.mock(Future.class);
         when(mockProducer.send(any(ProducerRecord.class))).thenReturn(future)
                 .thenThrow(RuntimeException.class);
-        doThrow(NotLeaderForPartitionException.class).when(future).get();
+        doThrow(NotLeaderOrFollowerException.class).when(future).get();
         doReturn(true).when(future).isDone();
         kafkaService.sendIgniteEvent(createIgniteEvent(Version.V1_0, "dummy", "FOOBAR"));
     }
@@ -219,12 +219,12 @@ public class KafkaServiceJunitTest {
     }
 
     @Test
-    public void kafkaCleanup() throws Exception {
-        MockProducer<byte[], byte[]> producer =
+    public void kafkaCleanup() {
+        MockProducer<byte[], byte[]> mockProducer =
                 new MockProducer<>(false, new ByteArraySerializer(), new ByteArraySerializer());
-        setProducer(producer);
+        setProducer(mockProducer);
         kafkaService.cleanUp();
-        assertTrue(producer.closed());
+        assertTrue(mockProducer.closed());
     }
 
     public void setProducer(MockProducer mockProducer) {
