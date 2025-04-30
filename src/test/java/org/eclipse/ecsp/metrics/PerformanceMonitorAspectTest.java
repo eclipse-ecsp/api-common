@@ -93,7 +93,7 @@ class PerformanceMonitorAspectTest {
         Timer timer = mock(Timer.class);
         Histogram histogram = mock(Histogram.class);
         when(registry.timer(anyString())).thenReturn(timer);
-        //when(histogram.labels(anyString(), anyString(), anyString())).thenReturn(timer);
+
         Histogram.Child histogramChild = mock(Histogram.Child.class);
         when(histogram.labels(anyString(), anyString(), anyString())).thenReturn(histogramChild);
         when(histogramChild.startTimer()).thenReturn(mock(Histogram.Timer.class));
@@ -178,7 +178,7 @@ class PerformanceMonitorAspectTest {
         Timer timer = mock(Timer.class);
         Histogram histogram = mock(Histogram.class);
         when(registry.timer(anyString())).thenReturn(timer);
-        //when(histogram.labels(anyString(), anyString(), anyString())).thenReturn(timer);
+
         Histogram.Child histogramChild = mock(Histogram.Child.class);
         when(histogram.labels(anyString(), anyString(), anyString())).thenReturn(histogramChild);
         when(histogramChild.startTimer()).thenReturn(mock(Histogram.Timer.class));
