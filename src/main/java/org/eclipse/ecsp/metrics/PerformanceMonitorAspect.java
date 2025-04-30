@@ -110,7 +110,7 @@ public class PerformanceMonitorAspect {
      * adding api metrics to the api request duration histogram.<br/>
      * checks if the class has {@link RestController} annotation and<br/>
      * and for legacy api signature checks for name of the class with <b>Controller</b><br/>
-     * it calculate the time taken to complete the execution.
+     * it calculates the time taken to complete the execution.
      *
      * @param jp ProceedingJoinPoint which contains class signature, method signature and arg etc.
      * @return object which is return by actual method call
@@ -161,8 +161,7 @@ public class PerformanceMonitorAspect {
     }
     
     private String anonymizeUrl(String requestUrl) {
-        return requestUrl.replaceFirst("/users/[a-zA-Z0-9]*/", "/users/{uid}/")
-            .replaceFirst("/vehicles/[a-zA-Z0-9]*/",
-                "/vehicles/{vid}/");
+        return requestUrl.replaceAll("/users/[a-zA-Z0-9]*/", "/users/{uid}/")
+            .replaceAll("/vehicles/[a-zA-Z0-9]*/", "/vehicles/{vid}/");
     }
 }
