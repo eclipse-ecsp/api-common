@@ -20,8 +20,8 @@ package org.eclipse.ecsp.utils;
 
 import org.junit.Assert;
 import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -37,35 +37,57 @@ public class ObjectUtilsTest {
      */
     public static final int INT_2 = 2;
     
-    @Test(expected = RuntimeException.class)
+    @Test
     public void requireNonEmptyTest() {
         String str1 = "A";
         String str2 = "";
         Assert.assertNotNull(ObjectUtils.requireNonEmpty(str1, "errorMsg"));
-        ObjectUtils.requireNonEmpty(str2, "errorMsg");
+        try {
+            ObjectUtils.requireNonEmpty(str2, "errorMsg");
+            Assertions.fail("Expected exception not thrown");
+        } catch (IllegalStateException e) {
+            Assert.assertEquals("errorMsg", e.getMessage());
+        }
         Assert.assertNotNull(ObjectUtils.requireNonNull(str1, "errorMsg"));
     }
     
-    @Test(expected = RuntimeException.class)
+    @Test
     public void requireSizeOfTest() {
-        List list = Arrays.asList("A");
+        List<String> list = List.of("A");
         Assert.assertTrue(ObjectUtils.requireSizeOf(list, 1, "errorMsg"));
-        ObjectUtils.requireSizeOf(list, INT_2, "errorMsg");
+        try {
+            ObjectUtils.requireSizeOf(list, INT_2, "errorMsg");
+            Assertions.fail("Expected exception not thrown");
+        } catch (IllegalStateException e) {
+            Assert.assertEquals("errorMsg", e.getMessage());
+        }
     }
     
-    @Test(expected = RuntimeException.class)
+    @Test
     public void requireMinSizeTest() {
-        List list = Arrays.asList("A");
-        Assert.assertTrue(ObjectUtils.requireMinSize(list, 1, "errorMsg"));
-        ObjectUtils.requireMinSize(list, INT_2, "errorMsg");
+        List<String> list = List.of("A");
+        Assertions.assertTrue(ObjectUtils.requireMinSize(list, 1, "errorMsg"));
+        try {
+            ObjectUtils.requireMinSize(list, INT_2, "errorMsg");
+            Assertions.fail("Expected exception not thrown");
+        } catch (IllegalStateException e) {
+            Assertions.assertEquals("errorMsg", e.getMessage());
+        }
+
     }
     
-    @Test(expected = RuntimeException.class)
+    @Test
     public void requiresNotNullAndNotEmpyTest() {
-        List list = Arrays.asList("A");
+        List<String> list = List.of("A");
         Assert.assertTrue(ObjectUtils.requiresNotNullAndNotEmpy(list, "errorMsg"));
         list = new ArrayList<>();
-        ObjectUtils.requiresNotNullAndNotEmpy(list, "errorMsg");
+        try {
+            ObjectUtils.requiresNotNullAndNotEmpy(list, "errorMsg");
+            Assertions.fail("Expected exception not thrown");
+        } catch (IllegalStateException e) {
+            Assert.assertEquals("errorMsg", e.getMessage());
+        }
+
     }
     
     

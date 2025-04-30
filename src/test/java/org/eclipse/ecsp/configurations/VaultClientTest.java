@@ -51,9 +51,9 @@ public class VaultClientTest {
     }
     
     @Test
-    public void testInitialize() throws Exception {
+    public void testInitialize() {
         
-        System.setProperty("key_name","value");
+        System.setProperty("key_name", "value");
         
         ReflectionTestUtils.invokeMethod(vaultClient, "initialize");
 

@@ -95,7 +95,7 @@ public class MongoServer extends ExternalResource {
      *
      * @return the mongoDB host
      */
-    public String getMongoDBHost() {
+    public String getMongoServerHost() {
         return MONGO_CONTAINER.getHost();
     }
 
@@ -104,7 +104,7 @@ public class MongoServer extends ExternalResource {
      *
      * @return the mongoDB port
      */
-    public int getMongoDBPort() {
+    public int getMongoServerPort() {
         return MONGO_CONTAINER.getFirstMappedPort();
     }
 }

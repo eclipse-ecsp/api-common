@@ -33,6 +33,7 @@ import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.core.env.Environment;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringRunner;
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -43,10 +44,11 @@ import java.util.concurrent.TimeUnit;
 @RunWith(SpringRunner.class)
 @SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
 @TestPropertySource("classpath:/application-base.properties")
-public class PrometheusMetricsExporterIntg extends CommonTestBase {
+public class PrometheusMetricsExporterTest extends CommonTestBase {
     private static final IgniteLogger LOGGER =
-        IgniteLoggerFactory.getLogger(PrometheusMetricsExporterIntg.class);
-    
+        IgniteLoggerFactory.getLogger(PrometheusMetricsExporterTest.class);
+    public static final int TIMEOUT = 10;
+
     static {
         // Workaround to avoid duplicate metrics registration in case of Spring
         // Boot dev-tools restarts
@@ -70,8 +72,10 @@ public class PrometheusMetricsExporterIntg extends CommonTestBase {
         String nodeName = env.getProperty("node.name");
         Assert.assertNotNull(nodeName);
         LOGGER.info("Node name {}", nodeName);
-        //new PrometheusMetricsRegistryAssertion().assertCaptured(nodeName);
-        TimeUnit.SECONDS.sleep(1L);
+        CountDownLatch latch = new CountDownLatch(1);
+        if (!latch.await(TIMEOUT, TimeUnit.MILLISECONDS)) {
+            LOGGER.error("Latch timed out");
+        }
         // now scrape the metrics and validate the same in the scraped text
         String metrics =
             restTemplate.getForObject("http://localhost:" + port + "/metrics", String.class);
@@ -88,7 +92,7 @@ public class PrometheusMetricsExporterIntg extends CommonTestBase {
     }
     
     @Test
-    public void testMetricsCaptureAndExport2() throws InterruptedException {
+    public void testMetricsCaptureAndExport2() {
         String nodeName = env.getProperty("node.name");
         String metrics =
             restTemplate.getForObject("http://localhost:" + port + "/metrics", String.class);

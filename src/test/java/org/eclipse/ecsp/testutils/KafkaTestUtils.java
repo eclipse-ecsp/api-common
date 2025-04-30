@@ -32,15 +32,17 @@ import org.apache.kafka.streams.StreamsConfig;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Paths;
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Properties;
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
-import java.util.stream.Collectors;
 
 /**
  * Utility functions to make integration testing more convenient.
@@ -119,9 +121,9 @@ public class KafkaTestUtils {
             while (totalPollTimeMs < maxTotalPollTimeMs
                 && continueConsuming(consumedValues.size(), maxMessages)) {
                 totalPollTimeMs += pollIntervalMs;
-                ConsumerRecords<K, V> records = consumer.poll(pollIntervalMs);
-                for (ConsumerRecord<K, V> record : records) {
-                    consumedValues.add(new KeyValue<>(record.key(), record.value()));
+                ConsumerRecords<K, V> records = consumer.poll(Duration.ofMillis(pollIntervalMs));
+                for (ConsumerRecord<K, V> kvConsumerRecord : records) {
+                    consumedValues.add(new KeyValue<>(kvConsumerRecord.key(), kvConsumerRecord.value()));
                 }
             }
         } finally {
@@ -166,16 +168,13 @@ public class KafkaTestUtils {
     public static <K, V> void produceKeyValuesSynchronously(
         String topic, Collection<KeyValue<K, V>> records, Properties producerConfig)
         throws ExecutionException, InterruptedException {
-        Producer<K, V> producer = new KafkaProducer<>(producerConfig);
-        try {
-            for (KeyValue<K, V> record : records) {
+        try (Producer<K, V> producer = new KafkaProducer<>(producerConfig)) {
+            for (KeyValue<K, V> kvRecord : records) {
                 Future<RecordMetadata> f = producer.send(
-                    new ProducerRecord<>(topic, record.key, record.value));
+                        new ProducerRecord<>(topic, kvRecord.key, kvRecord.value));
                 f.get();
             }
             producer.flush();
-        } finally {
-            producer.close();
         }
     }
     
@@ -207,11 +206,10 @@ public class KafkaTestUtils {
      * @return The KeyValue elements retrieved via the consumer
      * @throws TimeoutException if kafka timeout occures while reading message from kafka
      */
-    public static List<String[]> readMessages(String topic, Properties consumerProps, int i)
-        throws TimeoutException {
+    public static List<String[]> readMessages(String topic, Properties consumerProps, int i) {
         return KafkaTestUtils.readKeyValues(topic, consumerProps, i).stream()
             .map(t -> new String[] {(String) t.key, (String) t.value})
-            .collect(Collectors.toList());
+            .toList();
     }
     
     /**
@@ -279,28 +277,20 @@ public class KafkaTestUtils {
      * @param n             Maximum number of messages to read via the consumer
      * @param waitTime      wait for specified time before reading the next message from kafka
      * @return The KeyValue elements retrieved via the consumer
-     * @throws TimeoutException     if kafka timeout occurs while reading message from kafka
      * @throws InterruptedException if any interrupted occurs while sending message
-     */
-
-    /**
-     * This method is a getter for messages.
-     *
-     * @param topic : String
-     * @param consumerProps : Properties
-     * @param n : int
-     * @param waitTime : int
-     * @return List
      */
     public static List<String[]> getMessages(String topic, Properties consumerProps, int n,
                                              int waitTime)
-        throws TimeoutException, InterruptedException {
+        throws InterruptedException {
         int timeWaited = 0;
         int increment = INT_2000;
         List<String[]> messages = new ArrayList<>();
         while ((messages.size() < n) && (timeWaited <= waitTime)) {
             messages.addAll(KafkaTestUtils.readMessages(topic, consumerProps, n));
-            Thread.sleep(increment);
+            CountDownLatch countDownLatch = new CountDownLatch(1);
+            if (!countDownLatch.await(increment, TimeUnit.MILLISECONDS)) {
+                // timeout occurred
+            }
             timeWaited = timeWaited + increment;
         }
         return messages;

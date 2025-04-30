@@ -68,6 +68,8 @@
             src/main/java/org/eclipse/ecsp/Application.java
         </sonar.exclusions>
         <checkstyle.config.location>${project.basedir}/checkstyle.xml</checkstyle.config.location>
+        <checkstyle.version>10.23.0</checkstyle.version>
+        <maven.checkstyle.plugin.version>3.6.0</maven.checkstyle.plugin.version>
     </properties>
 
     <distributionManagement>
@@ -476,6 +478,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-checkstyle-plugin</artifactId>
+                <version>${maven.checkstyle.plugin.version}</version>
                 <executions>
                     <execution>
                         <id>validate</id>
@@ -484,6 +487,10 @@
                             <consoleOutput>true</consoleOutput>
                             <failsOnError>true</failsOnError>
                             <outputFileFormat>xml</outputFileFormat>
+                            <failsOnError>true</failsOnError>
+                            <includeTestSourceDirectory>true</includeTestSourceDirectory>
+                            <includeResources>true</includeResources>
+                            <includeTestResources>true</includeTestResources>
                         </configuration>
                         <goals>
                             <goal>check</goal>
@@ -494,7 +501,7 @@
                     <dependency>
                         <groupId>com.puppycrawl.tools</groupId>
                         <artifactId>checkstyle</artifactId>
-                        <version>10.13.0</version>
+                        <version>${checkstyle.version}</version>
                     </dependency>
                 </dependencies>
             </plugin>

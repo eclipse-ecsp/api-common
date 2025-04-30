@@ -32,8 +32,9 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringRunner;
-import java.util.ArrayList;
 import java.util.List;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 /**
@@ -58,41 +59,29 @@ public class HealthServiceUnitTest extends CommonTestBase {
     
     @Mock
     private IgniteDAOMongoConfigWithProps igniteDaoMongoConfigWithProps;
-    
-    @Mock
+
     private HealthValidation healthValidation;
     
     @Before
-    public void setUp() throws Exception {
-        MockitoAnnotations.initMocks(this);
+    public void setUp() {
+        MockitoAnnotations.openMocks(this);
+        healthValidation = new HealthValidation(healthService);
     }
     
     @Test
     public void testHealthCheck() {
-        
-        List<HealthMonitor> failedMonitors = new ArrayList<HealthMonitor>();
-        
-        Mockito.doCallRealMethod().when(healthValidation).setHealthService(Mockito.any());
-        Mockito.when(healthValidation.doInitialHealthValdiation()).thenCallRealMethod();
-        Mockito.doNothing().when(healthValidation).startPeriodicHealthValdiation();
-        
-        Mockito.when(healthService.triggerInitialCheck()).thenReturn(failedMonitors);
-        Mockito.when(igniteDaoMongoConfigWithProps.monitorName()).thenReturn("MONGO_HEALTH_MONITOR");
-        
-        healthValidation.setHealthService(healthService);
-        
-        List<HealthMonitor> healthMonitorList = healthValidation.doInitialHealthValdiation();
+        List<HealthMonitor> healthMonitorList = healthValidation.doInitialHealthValidation();
         assertTrue(healthMonitorList.isEmpty());
-        
-        failedMonitors.add(igniteDaoMongoConfigWithProps);
-        Mockito.when(healthService.triggerInitialCheck()).thenReturn(failedMonitors);
-        Mockito.when(igniteDaoMongoConfigWithProps.monitorName())
-            .thenReturn("NOT_MONGO_HEALTH_MONITOR");
-        
-        healthMonitorList = healthValidation.doInitialHealthValdiation();
-        assertTrue(!healthMonitorList.isEmpty());
-        
-        assertTrue(healthMonitorList.get(0).monitorName().equals("NOT_MONGO_HEALTH_MONITOR"));
+    }
+
+    @Test
+    public void testHealthCheckFailure() {
+        Mockito.doReturn("MONGO_HEALTH_MONITOR").when(igniteDaoMongoConfigWithProps).monitorName();
+        Mockito.doReturn(List.of(igniteDaoMongoConfigWithProps)).when(healthService).triggerInitialCheck();
+
+        List<HealthMonitor> healthMonitorList = healthValidation.doInitialHealthValidation();
+        assertFalse(healthMonitorList.isEmpty());
+        assertEquals("MONGO_HEALTH_MONITOR", healthMonitorList.get(0).monitorName());
     }
     
 }

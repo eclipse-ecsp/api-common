@@ -116,11 +116,9 @@ public class KafkaConfig {
     /**
      * This method validate and process kafka config from system properties.
      * This is applicable if vault.enabled is set to false
-     *
-     * @throws Exception error if exception occurred during producer initialization.
      */
     @PostConstruct
-    public void initialize() throws Exception {
+    public void initialize() {
         if (Boolean.parseBoolean(sslEnabled) && vaultEnabled) {
             try {
                 Map<Object, Object> properties = System.getProperties();
@@ -143,8 +141,8 @@ public class KafkaConfig {
                     "kafkaTruststorePassword is either null or empty");
                 
             } catch (Exception e) {
-                throw new RuntimeException(
-                    "Exception while loading  kafka config from system properties with message :- " + e.getMessage());
+                throw new IllegalStateException(
+                    "Exception while loading kafka config from system properties with message :- " + e.getMessage());
             }
         }
     }
@@ -193,11 +191,9 @@ public class KafkaConfig {
      * @param <V> generic value type
      *
      * @return instance of {@link Producer}
-     * @throws Exception error if exception occurred during producer initialization.
      */
     @Bean
-    public <K, V> Producer<K, V> producer() throws Exception {
-        Producer<K, V> producer = new KafkaProducer<K, V>(getProperties());
-        return producer;
+    public <K, V> Producer<K, V> producer() {
+        return new KafkaProducer<>(getProperties());
     }
 }

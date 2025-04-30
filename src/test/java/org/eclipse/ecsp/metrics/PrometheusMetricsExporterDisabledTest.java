@@ -20,8 +20,6 @@ package org.eclipse.ecsp.metrics;
 
 import io.prometheus.client.CollectorRegistry;
 import org.eclipse.ecsp.testutils.CommonTestBase;
-import org.eclipse.ecsp.utils.logger.IgniteLogger;
-import org.eclipse.ecsp.utils.logger.IgniteLoggerFactory;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -41,10 +39,7 @@ import org.springframework.test.context.junit4.SpringRunner;
 @RunWith(SpringRunner.class)
 @SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
 @TestPropertySource("classpath:/application-base-metrics-disabled.properties")
-public class PrometheusMetricsExporterDisabledIntg extends CommonTestBase {
-    private static final IgniteLogger LOGGER =
-        IgniteLoggerFactory.getLogger(PrometheusMetricsExporterDisabledIntg.class);
-
+public class PrometheusMetricsExporterDisabledTest extends CommonTestBase {
     /**
      * EXPECTED.
      */

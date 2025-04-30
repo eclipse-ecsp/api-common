@@ -34,13 +34,16 @@ import java.io.IOException;
  */
 @Testcontainers
 public class EmbeddedZookeeper {
-    
+
     private static final IgniteLogger LOGGER = IgniteLoggerFactory.getLogger(EmbeddedZookeeper.class);
+    public static final int ZOOKEEPER_PORT = 2181;
 
     @Container
-    private GenericContainer<?> zookeeperContainer = new GenericContainer<>(DockerImageName.parse("confluentinc/cp-zookeeper:7.4.0"))
-            .withEnv("ZOOKEEPER_CLIENT_PORT", "2181")
-            .withExposedPorts(2181);
+    private GenericContainer<?> zookeeperContainer =
+            new GenericContainer<>(
+                    DockerImageName.parse("confluentinc/cp-zookeeper:7.4.0"))
+            .withEnv("ZOOKEEPER_CLIENT_PORT", String.valueOf(ZOOKEEPER_PORT))
+            .withExposedPorts(ZOOKEEPER_PORT);
     String zookeeperConnect;
 
     /**
@@ -50,7 +53,7 @@ public class EmbeddedZookeeper {
     public EmbeddedZookeeper() {
         zookeeperContainer.start();
         // Get ZooKeeper connection string
-        zookeeperConnect = zookeeperContainer.getHost() + ":" + zookeeperContainer.getMappedPort(2181);
+        zookeeperConnect = zookeeperContainer.getHost() + ":" + zookeeperContainer.getMappedPort(ZOOKEEPER_PORT);
         LOGGER.debug("ZooKeeper running at: {}", zookeeperConnect);
         LOGGER.debug("Embedded ZooKeeper server at {} uses the temp directory at {}",
                 zookeeperConnect, zookeeperContainer.getContainerId());

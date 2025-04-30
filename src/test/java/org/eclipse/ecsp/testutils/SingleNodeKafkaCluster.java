@@ -112,7 +112,7 @@ public class SingleNodeKafkaCluster extends ExternalResource {
     /**
      * Creates and starts the cluster.
      */
-    public void start() throws Exception {
+    public void start() {
         LOGGER.debug("Initiating embedded Kafka cluster startup");
         LOGGER.debug("Starting a ZooKeeper instance...");
         zookeeper = new EmbeddedZookeeper();
@@ -196,7 +196,7 @@ public class SingleNodeKafkaCluster extends ExternalResource {
      *
      * @param topic The name of the topic.
      */
-    public void createTopic(final String topic) throws InterruptedException {
+    public void createTopic(final String topic) {
         createTopic(topic, INT_1, (short) INT_1, Collections.emptyMap());
     }
     
@@ -207,8 +207,7 @@ public class SingleNodeKafkaCluster extends ExternalResource {
      * @param partitions  The number of partitions for this topic.
      * @param replication The replication factor for (the partitions of) this topic.
      */
-    public void createTopic(final String topic, final int partitions, final short replication)
-        throws InterruptedException {
+    public void createTopic(final String topic, final int partitions, final short replication) {
         createTopic(topic, partitions, replication, Collections.emptyMap());
     }
     
@@ -223,7 +222,7 @@ public class SingleNodeKafkaCluster extends ExternalResource {
     public void createTopic(final String topic,
                             final int partitions,
                             final short replication,
-                            final Map<String, String> topicConfig) throws InterruptedException {
+                            final Map<String, String> topicConfig) {
         createTopic(TIMEOUT_MS, topic, partitions, replication, topicConfig);
     }
     
@@ -239,10 +238,10 @@ public class SingleNodeKafkaCluster extends ExternalResource {
                             final String topic,
                             final int partitions,
                             final short replication,
-                            final Map<String, String> topicConfig) throws InterruptedException {
+                            final Map<String, String> topicConfig) {
         broker.createTopic(topic, partitions, replication, topicConfig);
-        
-        
+        LOGGER.debug("Topic {} created with {} partitions and replication factor of {}, timeout {}",
+                    topic, partitions, replication, timeoutMs);
     }
     
     /**
@@ -252,8 +251,7 @@ public class SingleNodeKafkaCluster extends ExternalResource {
      *                  for the topics to be deleted (does not block if {@code <= 0})
      * @param topics    the name of the topics
      */
-    public void deleteTopicsAndWait(final long timeoutMs, final String... topics)
-        throws InterruptedException {
+    public void deleteTopicsAndWait(final long timeoutMs, final String... topics) {
         for (final String topic : topics) {
             try {
                 broker.deleteTopic(topic);
@@ -264,6 +262,7 @@ public class SingleNodeKafkaCluster extends ExternalResource {
         
         
     }
+
     public boolean isRunning() {
         return running;
     }

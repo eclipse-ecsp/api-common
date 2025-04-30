@@ -20,6 +20,7 @@ package org.eclipse.ecsp.domain;
 
 /**
  * Pojo for creating meaningful error response, used in RestControllerAdvice.<br/>
+ *
  * <p>message: contains the error message<br/>
  * detailedErrorCode:  contains details error code
  * </p>

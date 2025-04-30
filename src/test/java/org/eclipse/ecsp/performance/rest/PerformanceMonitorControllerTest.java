@@ -43,7 +43,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.context.junit4.SpringRunner;
-import java.io.IOException;
 import java.util.SortedMap;
 import java.util.TreeMap;
 import static org.mockito.Mockito.when;
@@ -84,15 +83,8 @@ public class PerformanceMonitorControllerTest {
     @MockitoBean
     private MetricRegistry metricRegistry;
     
-    // @Before
-    // public void setUp(){
-    //     CollectorRegistry.defaultRegistry.clear();
-    //     new PrometheusTestUtil().clearMetrics();
-    // }
-    
     @Test
-    //@Ignore
-    public void testJamonMetrics() throws Exception {
+    public void testJamonMetrics() {
         when(metricRegistry.getTimers()).thenReturn(prepareMetricRegistryTimer());
         HttpEntity<String> entity = new HttpEntity<String>(new HttpHeaders());
         ResponseEntity<String> response = restTemplate.exchange(
@@ -105,7 +97,7 @@ public class PerformanceMonitorControllerTest {
     
     @Test
     //@Ignore
-    public void testMetricsReset() throws IOException {
+    public void testMetricsReset() {
         when(metricRegistry.getTimers()).thenReturn(prepareMetricRegistryTimer());
         when(metricRegistry.getGauges()).thenReturn(prepareMetricRegistryGauge());
         when(metricRegistry.getCounters()).thenReturn(prepareMetricRegistryCounter());

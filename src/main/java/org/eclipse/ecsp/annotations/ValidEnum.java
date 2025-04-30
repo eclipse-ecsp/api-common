@@ -45,13 +45,14 @@ public @interface ValidEnum {
      *
      * @return enum class type.
      */
+    @SuppressWarnings("java:S1452")
     Class<? extends Enum<?>> enumClazz();
     
     /**
      * message if the value if invalid.
      * default: Value is not valid
      *
-     * @return actula message.
+     * @return actual message.
      */
     String message() default "Value is not valid";
     

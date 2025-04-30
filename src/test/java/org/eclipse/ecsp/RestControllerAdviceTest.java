@@ -61,8 +61,8 @@ import org.springframework.web.method.annotation.MethodArgumentTypeMismatchExcep
 import org.springframework.web.servlet.mvc.method.annotation.ExceptionHandlerExceptionResolver;
 import java.util.Set;
 import java.util.concurrent.ExecutionException;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.object.IsCompatibleType.typeCompatibleWith;
-import static org.junit.Assert.assertThat;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -84,6 +84,9 @@ public class RestControllerAdviceTest {
      * INT_2.
      */
     public static final int INT_2 = 2;
+    public static final String DEMO_URL = "/v1.0/demo";
+    public static final String ABCDEFG = "ABCDEFG";
+    public static final String MESSAGE = "$.[0].message";
     private MockMvc mockMvc;
     
     @InjectMocks
@@ -98,7 +101,7 @@ public class RestControllerAdviceTest {
     @Before
     public void setup() {
         CollectorRegistry.defaultRegistry.clear();
-        MockitoAnnotations.initMocks(this);
+        MockitoAnnotations.openMocks(this);
         final ExceptionHandlerExceptionResolver exceptionResolver =
             new ExceptionHandlerExceptionResolver();
         final StaticApplicationContext applicationContext = new StaticApplicationContext();
@@ -114,10 +117,10 @@ public class RestControllerAdviceTest {
     
     @Test
     public void testNoExceptionsWithProperJson() throws Exception {
-        String json = JsonUtils.getObjectValueAsString(new DemoEventRequest("ABCDEFG", INT_2));
+        String json = JsonUtils.getObjectValueAsString(new DemoEventRequest(ABCDEFG, INT_2));
         
         mockMvc.perform(
-                post("/v1.0/demo")
+                post(DEMO_URL)
                     .accept(MediaType.APPLICATION_JSON)
                     .contentType(MediaType.APPLICATION_JSON)
                     .content(json))
@@ -127,7 +130,7 @@ public class RestControllerAdviceTest {
     @Test
     public void testHttpMessageNotReadableExceptionOccursWithInvalidJson() throws Exception {
         String json = "InvalidJsonFormat";
-        MvcResult result = mockMvc.perform(post("/v1.0/demo")
+        MvcResult result = mockMvc.perform(post(DEMO_URL)
                 .accept(MediaType.APPLICATION_JSON)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(json))
@@ -141,7 +144,7 @@ public class RestControllerAdviceTest {
     public void testMethodArgumentNotValidExceptionOccursWithMandatoryParamMissingInJson()
         throws Exception {
         MvcResult result = mockMvc.perform(
-                post("/v1.0/demo")
+                post(DEMO_URL)
                     .accept(MediaType.APPLICATION_JSON)
                     .contentType(MediaType.APPLICATION_JSON)
                     .content("{\"foo\":\"ABCDEFG\"}"))
@@ -171,7 +174,7 @@ public class RestControllerAdviceTest {
         Set<ConstraintViolation<DemoEventRequest>> violations = validator.validate(eventRequest);
         when(service.createDemoEventRequest()).thenThrow(new ConstraintViolationException(violations));
         MvcResult result = mockMvc.perform(
-                post("/v1.0/demo")
+                post(DEMO_URL)
                     .accept(MediaType.APPLICATION_JSON)
                     .characterEncoding("UTF-8")
                     .contentType(MediaType.APPLICATION_JSON)
@@ -181,8 +184,8 @@ public class RestControllerAdviceTest {
                     // violation exception kicks in
                     .content("{\"msisdn\":\"ABC\", \"id\":\"-2\"}"))
             .andExpect(status().isBadRequest())
-            .andExpect(jsonPath("$.[0].message", Matchers.containsString("msisdn: must not be empty")))
-            .andExpect(jsonPath("$.[0].message",
+            .andExpect(jsonPath(MESSAGE, Matchers.containsString("msisdn: must not be empty")))
+            .andExpect(jsonPath(MESSAGE,
                 Matchers.containsString("id: must be greater than or equal to 0"))).andReturn();
         assertThat(result.getResolvedException().getClass(),
             typeCompatibleWith(ConstraintViolationException.class));
@@ -199,13 +202,13 @@ public class RestControllerAdviceTest {
         }
         
         when(service.createDemoEventRequest()).thenThrow(new FooBarException("Baz qux"));
-        String json = JsonUtils.getObjectValueAsString(new DemoEventRequest("ABCDEFG", INT_2));
+        String json = JsonUtils.getObjectValueAsString(new DemoEventRequest(ABCDEFG, INT_2));
         MvcResult result = mockMvc.perform(
-                post("/v1.0/demo")
+                post(DEMO_URL)
                     .accept(MediaType.APPLICATION_JSON)
                     .contentType(MediaType.APPLICATION_JSON)
                     .content(json))
-            .andExpect(jsonPath("$.[0].message", Matchers.containsString("Baz qux")))
+            .andExpect(jsonPath(MESSAGE, Matchers.containsString("Baz qux")))
             .andExpect(status().is5xxServerError()).andReturn();
         assertThat(result.getResolvedException().getClass(), typeCompatibleWith(FooBarException.class));
     }
@@ -218,9 +221,9 @@ public class RestControllerAdviceTest {
                 })
             .when(service)
             .createDemoEventRequest();
-        String json = JsonUtils.getObjectValueAsString(new DemoEventRequest("ABCDEFG", INT_2));
+        String json = JsonUtils.getObjectValueAsString(new DemoEventRequest(ABCDEFG, INT_2));
         MvcResult result = mockMvc.perform(
-                post("/v1.0/demo")
+                post(DEMO_URL)
                     .accept(MediaType.APPLICATION_JSON)
                     .contentType(MediaType.APPLICATION_JSON)
                     .content(json))
@@ -237,9 +240,9 @@ public class RestControllerAdviceTest {
                 })
             .when(service)
             .createDemoEventRequest();
-        String json = JsonUtils.getObjectValueAsString(new DemoEventRequest("ABCDEFG", INT_2));
+        String json = JsonUtils.getObjectValueAsString(new DemoEventRequest(ABCDEFG, INT_2));
         MvcResult result = mockMvc.perform(
-                post("/v1.0/demo")
+                post(DEMO_URL)
                     .accept(MediaType.APPLICATION_JSON)
                     .contentType(MediaType.APPLICATION_JSON)
                     .content(json))
@@ -256,9 +259,9 @@ public class RestControllerAdviceTest {
                 })
             .when(service)
             .createDemoEventRequest();
-        String json = JsonUtils.getObjectValueAsString(new DemoEventRequest("ABCDEFG", INT_2));
+        String json = JsonUtils.getObjectValueAsString(new DemoEventRequest(ABCDEFG, INT_2));
         MvcResult result = mockMvc.perform(
-                post("/v1.0/demo")
+                post(DEMO_URL)
                     .accept(MediaType.APPLICATION_JSON)
                     .contentType(MediaType.APPLICATION_JSON)
                     .content(json))
@@ -275,9 +278,9 @@ public class RestControllerAdviceTest {
                 })
             .when(service)
             .createDemoEventRequest();
-        String json = JsonUtils.getObjectValueAsString(new DemoEventRequest("ABCDEFG", INT_2));
+        String json = JsonUtils.getObjectValueAsString(new DemoEventRequest(ABCDEFG, INT_2));
         MvcResult result = mockMvc.perform(
-                post("/v1.0/demo")
+                post(DEMO_URL)
                     .accept(MediaType.APPLICATION_JSON)
                     .contentType(MediaType.APPLICATION_JSON)
                     .content(json))
@@ -294,9 +297,9 @@ public class RestControllerAdviceTest {
                 })
             .when(service)
             .createDemoEventRequest();
-        String json = JsonUtils.getObjectValueAsString(new DemoEventRequest("ABCDEFG", INT_2));
+        String json = JsonUtils.getObjectValueAsString(new DemoEventRequest(ABCDEFG, INT_2));
         MvcResult result = mockMvc.perform(
-                post("/v1.0/demo")
+                post(DEMO_URL)
                     .accept(MediaType.APPLICATION_JSON)
                     .contentType(MediaType.APPLICATION_JSON)
                     .content(json))
@@ -313,9 +316,9 @@ public class RestControllerAdviceTest {
                 })
             .when(service)
             .createDemoEventRequest();
-        String json = JsonUtils.getObjectValueAsString(new DemoEventRequest("ABCDEFG", INT_2));
+        String json = JsonUtils.getObjectValueAsString(new DemoEventRequest(ABCDEFG, INT_2));
         MvcResult result = mockMvc.perform(
-                post("/v1.0/demo")
+                post(DEMO_URL)
                     .accept(MediaType.APPLICATION_JSON)
                     .contentType(MediaType.APPLICATION_JSON)
                     .content(json))
@@ -332,9 +335,9 @@ public class RestControllerAdviceTest {
                 })
             .when(service)
             .createDemoEventRequest();
-        String json = JsonUtils.getObjectValueAsString(new DemoEventRequest("ABCDEFG", INT_2));
+        String json = JsonUtils.getObjectValueAsString(new DemoEventRequest(ABCDEFG, INT_2));
         MvcResult result = mockMvc.perform(
-                post("/v1.0/demo")
+                post(DEMO_URL)
                     .accept(MediaType.APPLICATION_JSON)
                     .contentType(MediaType.APPLICATION_JSON)
                     .content(json))
@@ -351,9 +354,9 @@ public class RestControllerAdviceTest {
                 })
             .when(service)
             .createDemoEventRequest();
-        String json = JsonUtils.getObjectValueAsString(new DemoEventRequest("ABCDEFG", INT_2));
+        String json = JsonUtils.getObjectValueAsString(new DemoEventRequest(ABCDEFG, INT_2));
         MvcResult result = mockMvc.perform(
-                post("/v1.0/demo")
+                post(DEMO_URL)
                     .accept(MediaType.APPLICATION_JSON)
                     .contentType(MediaType.APPLICATION_JSON)
                     .content(json))
@@ -369,9 +372,9 @@ public class RestControllerAdviceTest {
                 })
             .when(service)
             .createDemoEventRequest();
-        String json = JsonUtils.getObjectValueAsString(new DemoEventRequest("ABCDEFG", INT_2));
+        String json = JsonUtils.getObjectValueAsString(new DemoEventRequest(ABCDEFG, INT_2));
         MvcResult result = mockMvc.perform(
-                post("/v1.0/demo")
+                post(DEMO_URL)
                     .accept(MediaType.APPLICATION_JSON)
                     .contentType(MediaType.APPLICATION_JSON)
                     .content(json))

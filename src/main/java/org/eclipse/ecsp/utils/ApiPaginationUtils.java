@@ -129,7 +129,7 @@ public class ApiPaginationUtils {
                                         IgniteCriteriaGroup basicCriteriaGroupCopy,
                                         String sortOrder) {
         if (this.getObjectId() == null) {
-            throw new RuntimeException(Constants.ERROR_NULL_OBJECT_ID);
+            throw new IllegalStateException(Constants.ERROR_NULL_OBJECT_ID);
         }
         IgniteCriteria timestampCriteria;
         if (Constants.DESC_ORDER.equalsIgnoreCase(sortOrder)) {

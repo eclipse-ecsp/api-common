@@ -53,7 +53,7 @@ import java.util.Map;
  */
 public class JsonUtils {
     private static final IgniteLogger LOGGER = IgniteLoggerFactory.getLogger(JsonUtils.class);
-    private static ObjectMapper OBJECT_MAPPER = new ObjectMapper();
+    private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
     private static final DateTimeFormatter DATE_TIME_FORMATTER =
             ISODateTimeFormat.dateTime().withZoneUTC();
 
@@ -220,7 +220,7 @@ public class JsonUtils {
             return OBJECT_MAPPER.writeValueAsBytes(obj);
         } catch (JsonProcessingException e) {
             LOGGER.error("Unable to create the class for the object {} error {}", obj.toString(), e);
-            return null;
+            return new byte[]{};
         }
     }
 
@@ -261,7 +261,7 @@ public class JsonUtils {
             });
         } catch (Exception e) {
             LOGGER.error("Unable to convert the eventData to object and error is {}", e);
-            return null;
+            return Map.of();
         }
 
     }

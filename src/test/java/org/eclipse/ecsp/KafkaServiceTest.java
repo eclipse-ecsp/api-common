@@ -18,8 +18,6 @@
 
 package org.eclipse.ecsp;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.ser.impl.SimpleFilterProvider;
 import io.prometheus.client.CollectorRegistry;
 import org.apache.kafka.streams.KeyValue;
 import org.eclipse.ecsp.domain.AbstractBlobEventData.Encoding;
@@ -33,7 +31,6 @@ import org.eclipse.ecsp.kafka.service.KafkaService;
 import org.eclipse.ecsp.testutils.CommonTestBase;
 import org.eclipse.ecsp.testutils.KafkaTestUtils;
 import org.eclipse.ecsp.transform.GenericIgniteEventTransformer;
-import org.eclipse.ecsp.utils.JsonUtils;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -48,7 +45,6 @@ import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringRunner;
-import org.springframework.test.util.ReflectionTestUtils;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.ExecutionException;
@@ -76,11 +72,9 @@ public class KafkaServiceTest extends CommonTestBase {
             ).applyTo(configurableApplicationContext.getEnvironment());
             
             // create topic only once
-            try {
-                KAFKA_CLUSTER.createTopic("test");
-            } catch (InterruptedException e) {
-                throw new RuntimeException(e);
-            }
+            KAFKA_CLUSTER.createTopic("test");
+
+            CollectorRegistry.defaultRegistry.clear();
         }
     }
     
@@ -95,13 +89,8 @@ public class KafkaServiceTest extends CommonTestBase {
     
     @Override
     @Before
-    public void setup() throws Exception {
+    public void setup() {
         super.setup();
-        CollectorRegistry.defaultRegistry.clear();
-        ObjectMapper mapper =
-            (ObjectMapper) ReflectionTestUtils.getField(JsonUtils.class, "OBJECT_MAPPER");
-        mapper.setFilterProvider(new SimpleFilterProvider().setFailOnUnknownId(false));
-        ReflectionTestUtils.setField(JsonUtils.class, "OBJECT_MAPPER", mapper);
     }
     
     @Test

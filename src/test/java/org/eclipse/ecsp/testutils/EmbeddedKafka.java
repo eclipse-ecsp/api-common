@@ -18,7 +18,6 @@
 
 package org.eclipse.ecsp.testutils;
 
-import io.prometheus.client.CollectorRegistry;
 import kafka.server.KafkaConfig;
 import kafka.server.KafkaConfig$;
 import org.apache.kafka.clients.admin.AdminClient;
@@ -55,7 +54,7 @@ public class EmbeddedKafka {
     private static final IgniteLogger LOGGER = IgniteLoggerFactory.getLogger(EmbeddedKafka.class);
     private static final EmbeddedZookeeper ZOOKEEPER = new EmbeddedZookeeper();
     @Container
-    private final static KafkaContainer KAFKA_CONTAINER = new KafkaContainer("apache/kafka-native:3.8.0")
+    private static final KafkaContainer KAFKA_CONTAINER = new KafkaContainer("apache/kafka-native:3.8.0")
                 .withEnv("KAFKA_ZOOKEEPER_CONNECT", ZOOKEEPER.connectString())
                 .withEnv("KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR", "1");
 
@@ -81,9 +80,9 @@ public class EmbeddedKafka {
      *               broker should listen to.  Note that you cannot change some settings such as
      *               `log.dirs`, `port`.
      */
-    public EmbeddedKafka(final Properties config) throws Exception {
+    public EmbeddedKafka(final Properties config) {
         this.config = config;
-        if(!KAFKA_CONTAINER.isRunning()){
+        if (!KAFKA_CONTAINER.isRunning()) {
             KAFKA_CONTAINER.start();
         }
         // Get Kafka broker address
@@ -104,7 +103,8 @@ public class EmbeddedKafka {
     private Properties effectiveConfigFrom() {
         final Properties effectiveConfig = new Properties();
         effectiveConfig.put(KafkaConfig$.MODULE$.BrokerIdProp(), 0);
-        effectiveConfig.put(KafkaConfig.ListenersProp(), "PLAINTEXT://127.0.0.1:"+ KAFKA_CONTAINER.getFirstMappedPort());
+        effectiveConfig.put(KafkaConfig.ListenersProp(),
+                "PLAINTEXT://127.0.0.1:" + KAFKA_CONTAINER.getFirstMappedPort());
         effectiveConfig.put(KafkaConfig$.MODULE$.NumPartitionsProp(), 1);
         effectiveConfig.put(KafkaConfig$.MODULE$.AutoCreateTopicsEnableProp(), true);
         effectiveConfig.put(KafkaConfig$.MODULE$.MessageMaxBytesProp(), MESSAGE_MAX_BYTES);
@@ -128,7 +128,7 @@ public class EmbeddedKafka {
         return KAFKA_CONTAINER.getBootstrapServers();
     }
 
-    public String zookeeperConnect(){
+    public String zookeeperConnect() {
         return zookeeperConnect;
     }
     
@@ -138,11 +138,12 @@ public class EmbeddedKafka {
     public void stop() throws IOException {
         LOGGER.debug("Shutting down embedded Kafka broker at {} (with ZK ensemble at {}) ...",
                 brokerList, zookeeperConnect);
-        if(KAFKA_CONTAINER.isRunning()){
+        if (KAFKA_CONTAINER.isRunning()) {
             KAFKA_CONTAINER.stop();
         }
         ZOOKEEPER.stop();
-        LOGGER.debug("Shutdown of embedded Kafka broker at {} completed (with ZK ensemble at {}) ...",
+        LOGGER.debug("Shutdown of embedded Kafka broker at {} "
+                        + "completed (with ZK ensemble at {}) ...",
                 brokerList,  zookeeperConnect);
     }
     
