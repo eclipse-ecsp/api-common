@@ -68,7 +68,7 @@
             src/main/java/org/eclipse/ecsp/Application.java
         </sonar.exclusions>
         <checkstyle.config.location>${project.basedir}/checkstyle.xml</checkstyle.config.location>
-        <checkstyle.version>10.23.0</checkstyle.version>
+        <checkstyle.version>10.23.1</checkstyle.version>
         <maven.checkstyle.plugin.version>3.6.0</maven.checkstyle.plugin.version>
     </properties>
 
