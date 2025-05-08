@@ -18,11 +18,15 @@
 
 package com.example.test;
 
+import org.eclipse.ecsp.threadlocal.PlatformThreadLocal;
+import org.eclipse.ecsp.utils.logger.IgniteLogger;
+import org.eclipse.ecsp.utils.logger.IgniteLoggerFactory;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
@@ -30,6 +34,8 @@ import org.springframework.web.bind.annotation.RestController;
  */
 @RestController
 public class ExampleRestController {
+    private static final IgniteLogger LOGGER = IgniteLoggerFactory.getLogger(ExampleRestController.class);
+    private static final String PLATFORM_ID = "platform-id";
     /**
      * Example GET endpoint.
      *
@@ -70,5 +76,11 @@ public class ExampleRestController {
     @DeleteMapping("/example")
     public String exampleDeleteEndpoint() {
         return "Deleted";
+    }
+
+    @GetMapping("/test/platform-id")
+    public String testEndpoint(@RequestHeader(name = PLATFORM_ID, required = false) String platformId) {
+        LOGGER.debug("Received platform ID: {}", platformId);
+        return PlatformThreadLocal.getPlatformId() != null ? platformId : "No Platform ID found";
     }
 }

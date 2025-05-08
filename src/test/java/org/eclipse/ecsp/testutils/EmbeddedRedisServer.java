@@ -70,6 +70,9 @@ public class EmbeddedRedisServer extends ExternalResource {
      * @return the Redis address
      */
     public String getRedisAddress() {
+        if (!REDIS_CONTAINER.isRunning()) {
+            REDIS_CONTAINER.start();
+        }
         return REDIS_CONTAINER.getHost() + ":" + REDIS_CONTAINER.getFirstMappedPort();
     }
 

@@ -24,6 +24,7 @@ import com.mongodb.client.MongoClients;
 import com.mongodb.client.MongoDatabase;
 import org.eclipse.ecsp.utils.logger.IgniteLogger;
 import org.eclipse.ecsp.utils.logger.IgniteLoggerFactory;
+import org.junit.jupiter.api.TestInstance;
 import org.junit.rules.ExternalResource;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
@@ -36,6 +37,7 @@ import java.util.Map;
  * Embedded mongoDB server to testing which uses flapdoodle.
  */
 @Testcontainers
+@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 public class MongoServer extends ExternalResource {
     
     private static final IgniteLogger LOGGER = IgniteLoggerFactory.getLogger(MongoServer.class);
@@ -46,13 +48,16 @@ public class MongoServer extends ExternalResource {
 
     @DynamicPropertySource
     static void setProperties(DynamicPropertyRegistry registry) {
+        if(!MONGO_CONTAINER.isRunning()) {
+            MONGO_CONTAINER.start();
+        }
         registry.add("mongodb.hosts", MONGO_CONTAINER::getReplicaSetUrl);
         registry.add("mongodb.port", MONGO_CONTAINER::getFirstMappedPort);
         port = MONGO_CONTAINER.getFirstMappedPort();
     }
 
     @Override
-    public void before() throws Throwable {
+    public void before() {
         if (!MONGO_CONTAINER.isRunning()) {
             MONGO_CONTAINER.start();
             port = MONGO_CONTAINER.getFirstMappedPort();
@@ -105,6 +110,10 @@ public class MongoServer extends ExternalResource {
      * @return the mongoDB port
      */
     public int getMongoServerPort() {
-        return MONGO_CONTAINER.getFirstMappedPort();
+        if (!MONGO_CONTAINER.isRunning()) {
+            MONGO_CONTAINER.start();
+            port = MONGO_CONTAINER.getFirstMappedPort();
+        }
+        return port;
     }
 }

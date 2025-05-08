@@ -18,9 +18,11 @@
 
 package org.eclipse.ecsp.configurations;
 
+import org.eclipse.ecsp.interceptor.PlatformHeaderInterceptor;
 import org.eclipse.ecsp.metrics.MetricsFilter;
 import org.eclipse.ecsp.utils.logger.IgniteLogger;
 import org.eclipse.ecsp.utils.logger.IgniteLoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.context.annotation.Bean;
@@ -28,6 +30,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.core.Ordered;
 import org.springframework.validation.beanvalidation.MethodValidationPostProcessor;
 import org.springframework.web.servlet.config.annotation.CorsRegistry;
+import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 /**
@@ -53,6 +56,9 @@ public class WebConfig implements WebMvcConfigurer {
     
     @Value("#{'${processing.duration.buckets:0.05,0.1,0.2,0.3,0.4,0.7,1,2.5,5,10}'.split(',')}")
     private double[] apiProcessingDurationBuckets;
+
+    @Autowired
+    private PlatformHeaderInterceptor platformHeaderInterceptor;
 
     /**
      * create {@link MethodValidationPostProcessor}.
@@ -167,5 +173,11 @@ public class WebConfig implements WebMvcConfigurer {
      */
     public void setApiProcessingDurationBuckets(double[] apiProcessingDurationBuckets) {
         this.apiProcessingDurationBuckets = apiProcessingDurationBuckets;
+    }
+
+    @Override
+    public void addInterceptors(InterceptorRegistry registry) {
+        LOGGER.info("Adding platform header interceptor");
+        registry.addInterceptor(platformHeaderInterceptor);
     }
 }
