@@ -48,7 +48,7 @@ public class MongoServer extends ExternalResource {
 
     @DynamicPropertySource
     static void setProperties(DynamicPropertyRegistry registry) {
-        if(!MONGO_CONTAINER.isRunning()) {
+        if (!MONGO_CONTAINER.isRunning()) {
             MONGO_CONTAINER.start();
         }
         registry.add("mongodb.hosts", MONGO_CONTAINER::getReplicaSetUrl);

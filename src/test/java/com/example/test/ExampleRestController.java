@@ -36,6 +36,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class ExampleRestController {
     private static final IgniteLogger LOGGER = IgniteLoggerFactory.getLogger(ExampleRestController.class);
     private static final String PLATFORM_ID = "platform-id";
+
     /**
      * Example GET endpoint.
      *
