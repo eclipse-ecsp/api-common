@@ -1,5 +1,6 @@
 package org.eclipse.ecsp.integration;
 
+import io.prometheus.client.CollectorRegistry;
 import org.eclipse.ecsp.testutils.CommonTestBase;
 import org.eclipse.ecsp.threadlocal.PlatformThreadLocal;
 import org.junit.jupiter.api.AfterEach;
@@ -28,6 +29,10 @@ class PlatformHeaderInterceptorIntegrationTest extends CommonTestBase {
     private static final String PLATFORM_ID = "platform-id";
     @Autowired
     private MockMvc mockMvc; // Use MockMvc for testing
+
+    static {
+        CollectorRegistry.defaultRegistry.clear();
+    }
 
     @AfterEach
     void tearDown() {
