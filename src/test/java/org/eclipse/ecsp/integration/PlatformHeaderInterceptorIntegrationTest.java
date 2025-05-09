@@ -4,6 +4,7 @@ import io.prometheus.client.CollectorRegistry;
 import org.eclipse.ecsp.testutils.CommonTestBase;
 import org.eclipse.ecsp.threadlocal.PlatformThreadLocal;
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,6 +32,12 @@ class PlatformHeaderInterceptorIntegrationTest extends CommonTestBase {
     private MockMvc mockMvc; // Use MockMvc for testing
 
     static {
+        CollectorRegistry.defaultRegistry.clear();
+    }
+
+    @BeforeEach
+    void setUp() {
+        // Clear the CollectorRegistry to avoid duplicate metrics registration
         CollectorRegistry.defaultRegistry.clear();
     }
 

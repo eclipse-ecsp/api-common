@@ -25,6 +25,7 @@ import org.eclipse.ecsp.configurations.KafkaConfig;
 import org.eclipse.ecsp.testutils.CommonTestBase;
 import org.junit.Assert;
 import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.runner.RunWith;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -61,6 +62,12 @@ public class KafkaProducerTest extends CommonTestBase {
     KafkaConfig kafkaConfig;
     
     private Producer producer;
+
+    @BeforeEach
+    void setUp() {
+        // Clear the CollectorRegistry to avoid duplicate metrics registration
+        CollectorRegistry.defaultRegistry.clear();
+    }
     
     @Test
     public void testKafkaProducerProperties() {
