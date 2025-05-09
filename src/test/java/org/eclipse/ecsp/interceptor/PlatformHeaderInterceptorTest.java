@@ -40,7 +40,7 @@ class PlatformHeaderInterceptorTest {
     }
 
     @Test
-    void testPreHandleSetsPlatformId() throws Exception {
+    void testPreHandleSetsPlatformId() {
         when(request.getHeader(HEADER_NAME)).thenReturn(HEADER_VALUE);
 
         boolean result = interceptor.preHandle(request, response, null);
@@ -50,7 +50,7 @@ class PlatformHeaderInterceptorTest {
     }
 
     @Test
-    void testPreHandleDoesNotSetPlatformIdWhenHeaderIsMissing() throws Exception {
+    void testPreHandleDoesNotSetPlatformIdWhenHeaderIsMissing() {
         when(request.getHeader(HEADER_NAME)).thenReturn(null);
 
         boolean result = interceptor.preHandle(request, response, null);
@@ -60,7 +60,7 @@ class PlatformHeaderInterceptorTest {
     }
 
     @Test
-    void testAfterCompletionClearsPlatformId() throws Exception {
+    void testAfterCompletionClearsPlatformId() {
         PlatformThreadLocal.setPlatformId(HEADER_VALUE);
 
         interceptor.afterCompletion(request, response, null, null);
@@ -69,7 +69,7 @@ class PlatformHeaderInterceptorTest {
     }
 
     @Test
-    void testThreadLocalIsClearedAfterCompletion() throws Exception {
+    void testThreadLocalIsClearedAfterCompletion() {
         // Set a value in the ThreadLocal
         PlatformThreadLocal.setPlatformId(HEADER_VALUE);
 

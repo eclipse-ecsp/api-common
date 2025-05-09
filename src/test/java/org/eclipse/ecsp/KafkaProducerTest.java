@@ -47,7 +47,7 @@ import org.springframework.test.context.junit4.SpringRunner;
 @TestPropertySource("classpath:/application-base-kafka.properties")
 @Profile("test")
 @DirtiesContext
-public class KafkaProducerTest extends CommonTestBase {
+class KafkaProducerTest extends CommonTestBase {
     
     private static final Logger LOGGER = LoggerFactory.getLogger(KafkaProducerTest.class);
     
