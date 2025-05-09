@@ -33,6 +33,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Profile;
+import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringRunner;
 
@@ -45,6 +46,7 @@ import org.springframework.test.context.junit4.SpringRunner;
 @SpringBootTest
 @TestPropertySource("classpath:/application-base-kafka.properties")
 @Profile("test")
+@DirtiesContext
 public class KafkaProducerTest extends CommonTestBase {
     
     private static final Logger LOGGER = LoggerFactory.getLogger(KafkaProducerTest.class);
