@@ -24,6 +24,7 @@ import org.eclipse.ecsp.utils.logger.IgniteLogger;
 import org.eclipse.ecsp.utils.logger.IgniteLoggerFactory;
 import org.junit.Assert;
 import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -54,6 +55,11 @@ public class PrometheusMetricsExporterTest extends CommonTestBase {
     static {
         // Workaround to avoid duplicate metrics registration in case of Spring
         // Boot dev-tools restarts
+        CollectorRegistry.defaultRegistry.clear();
+    }
+
+    @BeforeEach
+    public void setup() {
         CollectorRegistry.defaultRegistry.clear();
     }
     
