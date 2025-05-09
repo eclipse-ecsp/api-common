@@ -32,6 +32,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.web.client.ResourceAccessException;
@@ -53,6 +54,7 @@ import static org.junit.Assert.assertEquals;
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes = RestTemplateConfig.class)
 @TestPropertySource("classpath:/rest-template-test.properties")
+@DirtiesContext
 public class RestTemplateConfigTest {
     private static final IgniteLogger LOGGER =
         IgniteLoggerFactory.getLogger(RestTemplateConfigTest.class);

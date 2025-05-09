@@ -93,7 +93,7 @@ public class MetricsFilter implements Filter {
     }
     
     @Override
-    public void init(FilterConfig fc) throws ServletException {
+    public void init(FilterConfig fc) {
         LOGGER.info("metricsEnabled: {}", metricsEnabled);
         LOGGER.info("apiProcessingDurationBuckets: {}", List.of(apiProcessingDurationBuckets));
         if (metricsEnabled) {

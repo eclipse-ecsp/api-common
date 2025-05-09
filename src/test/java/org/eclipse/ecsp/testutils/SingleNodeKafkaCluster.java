@@ -24,6 +24,7 @@ import kafka.server.KafkaConfig$;
 import org.apache.kafka.common.errors.UnknownTopicOrPartitionException;
 import org.eclipse.ecsp.utils.logger.IgniteLogger;
 import org.eclipse.ecsp.utils.logger.IgniteLoggerFactory;
+import org.junit.jupiter.api.TestInstance;
 import org.junit.rules.ExternalResource;
 import java.io.IOException;
 import java.util.Collections;
@@ -34,6 +35,7 @@ import java.util.Properties;
  * Runs an in-memory, "embedded" Kafka cluster with 1 ZooKeeper instance and 1
  * Kafka broker.
  */
+@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 public class SingleNodeKafkaCluster extends ExternalResource {
     
     private static final IgniteLogger LOGGER =
@@ -89,6 +91,7 @@ public class SingleNodeKafkaCluster extends ExternalResource {
     public SingleNodeKafkaCluster() {
         this(new Properties());
         CollectorRegistry.defaultRegistry.clear();
+        start();
     }
     
     public String zkConnectString() {

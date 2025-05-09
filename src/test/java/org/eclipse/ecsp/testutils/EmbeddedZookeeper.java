@@ -20,6 +20,7 @@ package org.eclipse.ecsp.testutils;
 
 import org.eclipse.ecsp.utils.logger.IgniteLogger;
 import org.eclipse.ecsp.utils.logger.IgniteLoggerFactory;
+import org.junit.jupiter.api.TestInstance;
 import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
@@ -33,6 +34,7 @@ import java.io.IOException;
  * it is automatically started when you create a new instance of this class.
  */
 @Testcontainers
+@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 public class EmbeddedZookeeper {
 
     private static final IgniteLogger LOGGER = IgniteLoggerFactory.getLogger(EmbeddedZookeeper.class);

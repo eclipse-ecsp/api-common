@@ -3,6 +3,7 @@ package org.eclipse.ecsp.metrics;
 import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.Timer;
 import com.example.test.ExampleRestController;
+import io.prometheus.client.CollectorRegistry;
 import io.prometheus.client.Histogram;
 import io.prometheus.client.hotspot.DefaultExports;
 import jakarta.servlet.http.HttpServletRequest;
@@ -24,10 +25,14 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 class PerformanceMonitorAspectTest {
-
     public static final double DOUBLE_POINT_5 = 0.05;
     public static final double DOUBLE_POINT_1 = 0.1;
     public static final double DOUBLE_POINT_2 = 0.2;
+
+    static {
+        CollectorRegistry.defaultRegistry.clear();
+    }
+
     @Mock
     private MetricRegistry registry;
 
