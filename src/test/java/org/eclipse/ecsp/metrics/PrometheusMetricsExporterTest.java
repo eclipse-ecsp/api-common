@@ -58,11 +58,6 @@ public class PrometheusMetricsExporterTest extends CommonTestBase {
         CollectorRegistry.defaultRegistry.clear();
     }
 
-    @BeforeEach
-    public void setup() {
-        CollectorRegistry.defaultRegistry.clear();
-    }
-    
     @LocalServerPort
     private int port;
     
@@ -84,35 +79,29 @@ public class PrometheusMetricsExporterTest extends CommonTestBase {
         if (!latch.await(TIMEOUT, TimeUnit.MILLISECONDS)) {
             LOGGER.error("Latch timed out");
         }
-        // now scrape the metrics and validate the same in the scraped text
+        // now scrape the metrics time and validate the same in the scraped text
         String metrics =
             restTemplate.getForObject("http://localhost:" + port + "/metrics", String.class);
         Assert.assertNotNull(metrics);
-        // node=localhost as defined in
-        // src/test/resources/application-base.properties
-        // 2.0 because 1 hit for index.html and 1 for /metrics
+
         Assert.assertTrue(
             metrics.contains(
                 "api_requests_total{method=\"GET\",node=\"" + nodeName + "\",} 2.0"));
         Assert.assertTrue(metrics.contains(
             "api_request_processing_duration_seconds_count{method=\"GET\",node=\"" + nodeName
                 + "\",} 1.0"));
-    }
-    
-    @Test
-    public void testMetricsCaptureAndExport2() {
-        String nodeName = env.getProperty("node.name");
-        String metrics =
-            restTemplate.getForObject("http://localhost:" + port + "/metrics", String.class);
+        // now scrape the metrics second time and validate the same in the scraped text
+        String metricsSecond =
+                restTemplate.getForObject("http://localhost:" + port + "/metrics", String.class);
         Assert.assertNotNull(metrics);
         // node=localhost as defined in
         // src/test/resources/application-base.properties
         // 2.0 because 1 hit for index.html and 1 for /metrics
         Assert.assertTrue(
-            metrics.contains(
-                "api_requests_total{method=\"GET\",node=\"" + nodeName + "\",} 3.0"));
-        Assert.assertTrue(metrics.contains(
-            "api_request_processing_duration_seconds_count{method=\"GET\",node=\"" + nodeName
-                + "\",} 2.0"));
+                metricsSecond.contains(
+                        "api_requests_total{method=\"GET\",node=\"" + nodeName + "\",} 3.0"));
+        Assert.assertTrue(metricsSecond.contains(
+                "api_request_processing_duration_seconds_count{method=\"GET\",node=\"" + nodeName
+                        + "\",} 2.0"));
     }
 }
