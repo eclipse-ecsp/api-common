@@ -87,6 +87,7 @@ public class CommonTestBase {
     }
 
     protected void setup() {
+        CollectorRegistry.defaultRegistry.clear();
         consumerProps.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, KAFKA_CLUSTER.bootstrapServers());
         consumerProps.put(ConsumerConfig.GROUP_ID_CONFIG, "tc-consumer");
         consumerProps.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");
