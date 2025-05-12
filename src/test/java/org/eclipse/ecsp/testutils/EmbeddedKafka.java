@@ -68,6 +68,9 @@ public class EmbeddedKafka {
 
     @DynamicPropertySource
     static void setProperties(DynamicPropertyRegistry registry) {
+        if (!KAFKA_CONTAINER.isRunning()) {
+            KAFKA_CONTAINER.start();
+        }
         // Get Kafka broker address
         String kafkaBroker = KAFKA_CONTAINER.getHost() + ":" + KAFKA_CONTAINER.getFirstMappedPort();
         registry.add("kafka.broker.url", () -> kafkaBroker);
@@ -125,6 +128,9 @@ public class EmbeddedKafka {
      * <p>You can use this to tell Kafka producers and consumers how to connect to this instance.
      */
     public String brokerList() {
+        if (!KAFKA_CONTAINER.isRunning()) {
+            KAFKA_CONTAINER.start();
+        }
         return KAFKA_CONTAINER.getBootstrapServers();
     }
 

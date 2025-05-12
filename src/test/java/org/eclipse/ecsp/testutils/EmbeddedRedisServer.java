@@ -44,7 +44,11 @@ public class EmbeddedRedisServer extends ExternalResource {
 
     @DynamicPropertySource
     static void setProperties(DynamicPropertyRegistry registry) {
+        if (!REDIS_CONTAINER.isRunning()) {
+            REDIS_CONTAINER.start();
+        }
         registry.add("redis.address", () -> REDIS_CONTAINER.getHost() + ":" + REDIS_CONTAINER.getFirstMappedPort());
+        System.setProperty("redis.address", REDIS_CONTAINER.getHost() + ":" + REDIS_CONTAINER.getFirstMappedPort());
     }
 
     @Override
@@ -70,6 +74,9 @@ public class EmbeddedRedisServer extends ExternalResource {
      * @return the Redis address
      */
     public String getRedisAddress() {
+        if (!REDIS_CONTAINER.isRunning()) {
+            REDIS_CONTAINER.start();
+        }
         return REDIS_CONTAINER.getHost() + ":" + REDIS_CONTAINER.getFirstMappedPort();
     }
 
