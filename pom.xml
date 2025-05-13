@@ -448,6 +448,7 @@
                             <shadedArtifactAttached>true</shadedArtifactAttached>
                             <minimizeJar>false</minimizeJar>
                             <artifactSet />
+                            <createDependencyReducedPom>false</createDependencyReducedPom>
                         </configuration>
                     </execution>
                 </executions>
