@@ -10,7 +10,7 @@
     </parent>
 
     <artifactId>api-common</artifactId>
-    <version>1.0.0-SNAPSHOT</version>
+    <version>1.0.1-SNAPSHOT</version>
 
     <name>api-common</name>
     <description>api-common is library provides common functionality for exposing Rest APIs</description>
