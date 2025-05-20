@@ -23,8 +23,8 @@ It includes the following:
 # Table of Contents
 * [Getting Started](#getting-started)
 * [Usage](#usage)
-* [How to contribute](#how-to-contribute)
 * [Built with Dependencies](#built-with-dependencies)
+* [How to contribute](#how-to-contribute)
 * [Code of Conduct](#code-of-conduct)
 * [Authors](#authors)
 * [Security Contact Information](#security-contact-information)
@@ -46,7 +46,7 @@ from the command line interface.
 
 You need the following to install the software:
 * [Java jdk 17+](https://jdk.java.net/archive/) 
-* [Maven 3.6](https://maven.apache.org/)
+* [Maven 3.6 or higher](https://maven.apache.org/)
 
 #### dependencies on other modules
 
@@ -138,6 +138,10 @@ Describe the details for configuring a style check in the IDE.
 
 Checkstyle plugin [maven-checkstyle-plugin:3.3.1](https://maven.apache.org/plugins/maven-checkstyle-plugin/) is integrated in [pom.xml](./pom.xml) which runs in the `validate` phase and `check` goal of the maven lifecycle and fails the build if there are any checkstyle errors in the project.
 
+To run checkstyle plugin explicitly, run the following command:
+```shell
+mvn checkstyle:check
+```
 ### Running the tests
 
 Execute the Unit Test cases
@@ -163,13 +167,13 @@ Add api-common dependency to the API microservices.
 #### Configure the application base package
 the main class Application initialize and scan component under package org.eclipse.ecsp
 
-to create and configure application bean available in different package (e.g. com.example), below config can be used to include the application package
+to create and configure application bean available in different package (e.g. com.example), Below config can be used to include the application package
 ```properties
 base.package=org.eclipse.ecsp
 ```
 
 #### Kafka Service:
-Kafka service to push message to the Kafka cluster. below are the required properties for kafka service.
+Kafka service to push message to the Kafka cluster. Below are the required properties for kafka service.
 ```properties
 kafka.sink.topic=KafkaTopicName # kafka topic name
 kafka.producer.synchronous.push=<true/false> # if enabled, message will be published in sync manner. 
