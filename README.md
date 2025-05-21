@@ -45,7 +45,7 @@ from the command line interface.
 ### Prerequisites
 
 You need the following to install the software:
-* [Java jdk 17+](https://jdk.java.net/archive/) 
+* [Java jdk 17+](https://www.azul.com/downloads/?version=java-17-lts&package=jdk#zulu) 
 * [Maven 3.6 or higher](https://maven.apache.org/)
 
 #### dependencies on other modules
